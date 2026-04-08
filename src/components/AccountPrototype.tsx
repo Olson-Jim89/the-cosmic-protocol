@@ -38,11 +38,11 @@ export default function AccountPrototype() {
           <div className="grid grid-2">
             <label>
               Callsign
-              <input name="callsign" type="text" placeholder="Vega-Actual" required />
+              <input name="callsign" type="text" placeholder="Vega-Actual" required disabled />
             </label>
             <label>
               Crew Role
-              <select name="role">
+              <select name="role" disabled>
                 <option>Player</option>
                 <option>Game Master</option>
                 <option>Artist</option>
@@ -52,13 +52,13 @@ export default function AccountPrototype() {
           </div>
           <label>
             Email
-            <input name="email" type="email" placeholder="captain@cosmicprotocol.io" required />
+            <input name="email" type="email" placeholder="captain@cosmicprotocol.io" required disabled />
           </label>
           <label>
             Password
-            <input name="password" type="password" placeholder="Create a secure password" required />
+            <input name="password" type="password" placeholder="Create a secure password" required disabled />
           </label>
-          <button type="submit" className="button primary">Create Account</button>
+          <button type="submit" className="button primary" disabled>Create Account</button>
         </form>
         <p className="status">{registerStatus}</p>
       </article>
@@ -68,13 +68,13 @@ export default function AccountPrototype() {
         <form onSubmit={onLoginSubmit} className="grid" style={{ gap: 12 }}>
           <label>
             Email
-            <input name="email" type="email" placeholder="crew@cosmicprotocol.io" required />
+            <input name="email" type="email" placeholder="crew@cosmicprotocol.io" required disabled />
           </label>
           <label>
             Password
-            <input name="password" type="password" placeholder="Enter your password" required />
+            <input name="password" type="password" placeholder="Enter your password" required disabled />
           </label>
-          <button type="submit" className="button secondary">Login</button>
+          <button type="submit" className="button secondary" disabled>Login</button>
         </form>
         <p className="status">{loginStatus}</p>
       </article>
