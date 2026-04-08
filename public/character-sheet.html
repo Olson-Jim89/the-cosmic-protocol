@@ -1,0 +1,2727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cosmic Protocol — Galactic Passport</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+  :root {
+    --metal-dark: #1a1c20;
+    --metal-mid: #2a2d35;
+    --metal-light: #3d4150;
+    --metal-shine: #5a5f6e;
+    --metal-highlight: #7a8090;
+    --plate-bg: #22242c;
+    --rivet: #8a9aaa;
+    --rivet-shine: #c0d0dc;
+    --wire-blue: #00c8ff;
+    --wire-gold: #ffc840;
+    --wire-red: #ff4060;
+    --wire-green: #40ff90;
+    --accent-cyan: #00e5ff;
+    --accent-gold: #ffb800;
+    --text-bright: #e8eef5;
+    --text-dim: #7a8898;
+    --text-label: #a0b8c8;
+    --glow-cyan: 0 0 8px rgba(0,229,255,0.6);
+    --glow-gold: 0 0 8px rgba(255,184,0,0.6);
+    --ink: #c8dae8;
+    --scratch-line: rgba(200,218,232,0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* Force all backgrounds and borders to render in print */
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  body {
+    background: #0d0e12;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(0,60,80,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(40,20,60,0.15) 0%, transparent 60%);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 40px 20px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .passport {
+    width: 900px;
+    background: linear-gradient(160deg, #23262e 0%, #1a1c22 40%, #1e2028 100%);
+    border: 2px solid var(--metal-shine);
+    border-radius: 6px;
+    box-shadow:
+      0 0 0 1px #0a0b0d,
+      0 0 40px rgba(0,0,0,0.8),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Scratch texture overlay */
+  .passport::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(87deg, transparent, transparent 3px, var(--scratch-line) 3px, var(--scratch-line) 4px),
+      repeating-linear-gradient(2deg, transparent, transparent 6px, var(--scratch-line) 6px, var(--scratch-line) 7px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  .passport > * { position: relative; z-index: 1; }
+
+  /* ── WIRING DECORATION ── */
+  .wire-strip {
+    height: 6px;
+    background: repeating-linear-gradient(90deg,
+      #c8960a 0px, #c8960a 55px,
+      #8b0000 55px, #8b0000 110px,
+      #f5c200 110px, #f5c200 150px,
+      #3a1a00 150px, #3a1a00 180px,
+      #a30000 180px, #a30000 230px,
+      #d4a012 230px, #d4a012 280px
+    );
+    opacity: 0.9;
+    box-shadow: 0 2px 10px rgba(180,80,0,0.4);
+  }
+
+  .wire-strip-bottom {
+    height: 4px;
+    background: repeating-linear-gradient(90deg,
+      #8b0000 0px, #8b0000 70px,
+      #c8960a 70px, #c8960a 120px,
+      #3a1a00 120px, #3a1a00 150px,
+      #f5c200 150px, #f5c200 200px,
+      #7a0000 200px, #7a0000 240px,
+      #b07800 240px, #b07800 280px
+    );
+    opacity: 0.85;
+    box-shadow: 0 -2px 8px rgba(140,40,0,0.3);
+  }
+
+  /* ── RIVET MIXIN ── */
+  .plate {
+    background: linear-gradient(145deg, #282b35 0%, #1f2228 50%, #252830 100%);
+    border: 1px solid var(--metal-shine);
+    border-radius: 3px;
+    position: relative;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      inset 0 -1px 0 rgba(0,0,0,0.4),
+      2px 2px 6px rgba(0,0,0,0.5);
+  }
+
+  .plate::before, .plate::after {
+    content: '';
+    position: absolute;
+    width: 8px; height: 8px;
+    background: radial-gradient(circle at 35% 30%, var(--rivet-shine), var(--rivet) 50%, #3a4050);
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.1);
+    z-index: 2;
+  }
+  .plate::before { top: 5px; left: 5px; }
+  .plate::after  { top: 5px; right: 5px; }
+
+  .plate.riveted-all { padding: 12px; }
+  .plate.riveted-all::before { top: 5px; left: 5px; }
+  .plate.riveted-all::after  { top: 5px; right: 5px; }
+
+  .rivet-br {
+    position: absolute;
+    width: 8px; height: 8px;
+    background: radial-gradient(circle at 35% 30%, var(--rivet-shine), var(--rivet) 50%, #3a4050);
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  }
+  .rivet-bl { bottom: 5px; left: 5px; }
+  .rivet-br-pos { bottom: 5px; right: 5px; }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px 12px;
+    border-bottom: 2px solid var(--metal-shine);
+    gap: 16px;
+    background: linear-gradient(180deg, rgba(0,20,30,0.4) 0%, transparent 100%);
+  }
+
+  .logo-plate {
+    width: 72px; height: 72px;
+    background: linear-gradient(145deg, #2a2f3c, #1a1e28);
+    border: 2px solid var(--accent-cyan);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    box-shadow: var(--glow-cyan), inset 0 0 12px rgba(0,229,255,0.1);
+    flex-shrink: 0;
+  }
+  .logo-plate::before {
+    content: '';
+    position: absolute;
+    width: 6px; height: 6px;
+    background: radial-gradient(circle, var(--rivet-shine), var(--rivet));
+    border-radius: 50%;
+    top: 3px; left: 3px;
+    box-shadow: 58px 0 0 0 var(--rivet), 0 58px 0 0 var(--rivet), 58px 58px 0 0 var(--rivet);
+  }
+
+  /* SVG Logo inline */
+  .logo-svg {
+    width: 50px; height: 50px;
+  }
+
+  .header-text {
+    flex: 1;
+  }
+
+  .passport-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--accent-cyan);
+    letter-spacing: 0.2em;
+    text-shadow: var(--glow-cyan);
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .passport-subtitle {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .passport-id {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    letter-spacing: 0.15em;
+  }
+
+  .header-level-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 10px;
+  }
+  .header-level-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .header-level-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+  }
+  .header-level-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(0,229,255,0.3);
+    color: var(--accent-cyan);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    width: 36px;
+    text-align: center;
+    outline: none;
+    padding: 1px 2px;
+    letter-spacing: 0.1em;
+  }
+  .header-exp-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,184,0,0.35);
+    color: var(--wire-gold);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    width: 72px;
+    text-align: center;
+    outline: none;
+    padding: 1px 2px;
+    letter-spacing: 0.05em;
+  }
+  .header-level-input:focus { border-bottom-color: var(--accent-cyan); }
+  .header-exp-input:focus { border-bottom-color: var(--wire-gold); }
+
+  .header-right {
+    text-align: right;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--wire-green);
+    box-shadow: 0 0 5px var(--wire-green);
+    margin-right: 4px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── MAIN BODY ── */
+  .body-wrapper {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ── IDENTITY SECTION ── */
+  .identity-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .name-plate {
+    flex: 2;
+    padding: 10px 14px 10px;
+    min-height: 60px;
+  }
+
+  .field-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 7px;
+    color: var(--accent-gold);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    text-shadow: var(--glow-gold);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .etch-field {
+    border: none;
+    border-bottom: 1px solid rgba(0,229,255,0.3);
+    background: transparent;
+    color: var(--text-bright);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    width: 100%;
+    padding: 2px 0;
+    outline: none;
+    letter-spacing: 0.08em;
+  }
+  .etch-field:focus { border-bottom-color: var(--accent-cyan); box-shadow: 0 1px 0 var(--accent-cyan); }
+  .etch-field.large { font-size: 18px; font-family: 'Orbitron', sans-serif; font-weight: 700; }
+
+  .id-mini-plate {
+    flex: 1;
+    padding: 8px 12px 8px;
+    min-height: 60px;
+  }
+
+  /* ── CHAR GRID (identity + attributes share columns) ── */
+  .char-grid {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 10px;
+  }
+
+  .id-left-group {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .id-right-group {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .vitals-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* ── ABILITIES ROW ── */
+  .section-header {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px;
+    color: var(--text-dim);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--metal-shine);
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+  }
+
+  .abilities-plate {
+    padding: 10px 16px 14px;
+  }
+
+  .abilities-row {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .ability-cell {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+  }
+
+  .ability-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 1px;
+  }
+
+  .ability-label span {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    color: var(--accent-gold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-shadow: var(--glow-gold);
+    line-height: 1;
+    display: block;
+  }
+
+  .ability-box {
+    width: 44px; height: 34px;
+    background: linear-gradient(145deg, #1a1c22, #13141a);
+    border: 1px solid var(--metal-shine);
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
+  }
+
+  .ability-box input {
+    width: 100%; height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--accent-cyan);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    text-shadow: var(--glow-cyan);
+  }
+
+  /* ── DERIVED STATS ── */
+  .derived-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0,229,255,0.12);
+  }
+
+  .derived-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    gap: 3px;
+  }
+
+  .derived-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 6px;
+    color: var(--text-dim);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .derived-box {
+    width: 100%; height: 22px;
+    background: linear-gradient(145deg, #1a1c22, #13141a);
+    border: 1px solid rgba(90,95,110,0.5);
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .derived-box input {
+    width: 100%; height: 100%;
+    background: transparent; border: none; outline: none;
+    color: var(--wire-green);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    text-shadow: 0 0 6px var(--wire-green);
+  }
+
+  /* ── COMBAT STATUS ── */
+  .status-plate {
+    padding: 10px 16px 12px;
+  }
+
+  .status-body {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  .ap-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding-right: 16px;
+    border-right: 1px solid rgba(0,229,255,0.15);
+    flex-shrink: 0;
+  }
+
+  .ap-sublabel {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 6px;
+    color: var(--accent-gold);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    text-shadow: var(--glow-gold);
+  }
+
+  .ap-pips {
+    display: flex;
+    gap: 8px;
+  }
+
+  .ap-pip {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-gold);
+    background: transparent;
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(255,184,0,0.3);
+    transition: background 0.15s, box-shadow 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .ap-pip:checked {
+    background: var(--accent-gold);
+    box-shadow: 0 0 10px rgba(255,184,0,0.8), 0 0 20px rgba(255,184,0,0.3);
+  }
+
+  .ap-pip:disabled {
+    border-color: rgba(255,184,0,0.18);
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.3;
+  }
+
+  .conditions-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    flex: 1;
+  }
+
+  .condition-cell {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+  }
+
+  .condition-pip {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,64,96,0.5);
+    background: transparent;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: no00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ne;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .condition-pip:checked {
+    background: rgba(255,64,96,0.85);
+    border-color: var(--wire-red);
+    box-shadow: 0 0 8px rgba(255,64,96,0.7);
+  }
+
+  .condition-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 7px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    user-select: none;
+  }
+
+  /* ── VITALS ── */
+  .vitals-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .vitals-plate {
+    flex: 1;
+    padding: 10px 14px 12px;
+  }
+
+  .fraction-field {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+  }
+
+  .fraction-input {
+    width: 46px;
+    background: linear-gradient(145deg, #1a1c22, #13141a);
+    border: 1px solid var(--metal-shine);
+    border-radius: 2px;
+    color: var(--wire-green);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    padding: 4px 2px;
+    outline: none;
+    text-shadow: 0 0 8px var(--wire-green);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .fraction-input:focus { border-color: var(--wire-green); }
+
+  .fraction-slash {
+    color: var(--text-dim);
+    font-size: 20px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .defense-plate {
+    flex: 0 0 auto;
+    padding: 10px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .defense-armor-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .armor-plate {
+    flex: 1;
+    padding: 10px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .armor-field-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .armor-field-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 6px;
+    color: var(--text-dim);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .armor-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(0,229,255,0.2);
+    color: var(--accent-cyan);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    width: 70px;
+    text-align: right;
+    outline: none;
+    padding: 1px 2px;
+  }
+  .armor-input:focus { border-bottom-color: var(--accent-cyan); }
+
+  .defense-hex {
+    width: 60px; height: 60px;
+    background: linear-gradient(145deg, #1a1c22, #13141a);
+    border: 2px solid var(--wire-red);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 10px rgba(255,64,96,0.3), inset 0 2px 4px rgba(0,0,0,0.6);
+    margin-top: 4px;
+  }
+
+  .defense-hex input {
+    width: 100%; height: 100%;
+    background: transparent; border: none; outline: none;
+    color: var(--wire-red);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    text-align: center;
+    text-shadow: 0 0 10px var(--wire-red);
+  }
+
+  /* ── RATING MINI PLATES (Attack / Diplomatic) ── */
+  .rating-mini-plate {
+    flex: 1;
+    padding: 8px 12px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .rating-hex {
+    width: 60px; height: 60px;
+    background: linear-gradient(145deg, #1a1c22, #13141a);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 4px;
+  }
+  .rating-hex.atk {
+    border: 2px solid var(--wire-gold);
+    box-shadow: 0 0 10px rgba(255,184,0,0.3), inset 0 2px 4px rgba(0,0,0,0.6);
+  }
+  .rating-hex.dip {
+    border: 2px solid var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(0,229,255,0.3), inset 0 2px 4px rgba(0,0,0,0.6);
+  }
+  .rating-hex.atk input {
+    width: 100%; height: 100%;
+    background: transparent; border: none; outline: none;
+    color: var(--wire-gold);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    text-align: center;
+    text-shadow: 0 0 10px var(--wire-gold);
+  }
+  .rating-hex.dip input {
+    width: 100%; height: 100%;
+    background: transparent; border: none; outline: none;
+    color: var(--accent-cyan);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    text-align: center;
+    text-shadow: 0 0 10px var(--accent-cyan);
+  }
+
+  /* ── ARMOR MANIFEST (inside worn equipment) ── */
+  .armor-manifest-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-top: 8px;
+    margin-top: 8px;
+    border-top: 1px solid rgba(0,229,255,0.12);
+    flex-wrap: wrap;
+  }
+  .armor-manifest-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 7px;
+    color: var(--accent-gold);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .armor-manifest-field {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .armor-manifest-field-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 6px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    white-space: nowrap;
+  }
+  .armor-manifest-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,184,0,0.3);
+    color: var(--wire-gold);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    width: 60px;
+    text-align: right;
+    outline: none;
+    padding: 1px 2px;
+  }
+  .armor-manifest-input:focus { border-bottom-color: var(--wire-gold); }
+
+  /* ── ATTACKS ── */
+  .attacks-plate {
+    padding: 10px 14px 14px;
+  }
+
+  .attack-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 70px 70px 70px;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(90,95,110,0.3);
+  }
+  .attack-row:last-child { border-bottom: none; margin-bottom: 0; }
+
+  .attack-col-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 6px;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0 2px;
+  }
+
+  .attack-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(0,229,255,0.2);
+    color: var(--text-bright);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    padding: 2px 4px;
+    outline: none;
+    width: 100%;
+  }
+  .attack-input:focus { border-bottom-color: var(--accent-cyan); }
+  .attack-input.prefilled { color: var(--wire-gold); }
+
+  /* ── FEATS ── */
+  .feats-plate {
+    padding: 10px 14px 14px;
+  }
+
+  .feat-row {
+    display: grid;
+    grid-template-columns: 28px 60px 1fr 60px;
+    gap: 5px;
+    align-items: center;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(90,95,110,0.2);
+  }
+  .feat-row:last-child { border-bottom: none; margin-bottom: 0; }
+
+  .feat-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    color: var(--text-dim);
+    text-align: center;
+  }
+
+  .feat-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(0,229,255,0.15);
+    color: var(--text-bright);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 2px 3px;
+    outline: none;
+    width: 100%;
+  }
+  .feat-input:focus { border-bottom-color: var(--accent-cyan); }
+  .feat-input.attr { color: var(--wire-gold); font-size: 9px; }
+  .feat-input.level { color: var(--wire-blue); text-align: center; }
+
+  /* ── EQUIPMENT ROW ── */
+  .equipment-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .clothing-plate {
+    flex: 2;
+    padding: 10px 14px 14px;
+  }
+
+  .clothing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .clothing-slot {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .clothing-slot-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 7px;
+    color: var(--accent-cyan);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-align: center;
+    text-shadow: var(--glow-cyan);
+  }
+
+  .clothing-icon {
+    font-size: 16px;
+    text-align: center;
+    filter: grayscale(0.4) brightness(0.9);
+    margin-bottom: 2px;
+  }
+
+  .clothing-item-input {
+    background: linear-gradient(145deg, #1a1c22, #13141a);
+    border: 1px solid rgba(90,95,110,0.5);
+    border-radius: 2px;
+    color: var(--text-bright);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    padding: 3px 5px;
+    outline: none;
+    width: 100%;
+  }
+  .clothing-item-input:focus { border-color: var(--accent-cyan); }
+
+  /* ── CREDITS CARD ── */
+  .credits-plate {
+    flex: 1;
+    padding: 0;
+    overflow: hidden;
+    background: linear-gradient(135deg, #060c18 0%, #0a1428 35%, #0d1a30 60%, #060e1c 100%);
+    border: 1px solid rgba(0,180,255,0.4);
+    border-radius: 10px;
+    box-shadow:
+      0 0 0 1px rgba(0,80,160,0.3),
+      0 0 25px rgba(0,150,255,0.2),
+      0 0 60px rgba(0,80,200,0.1),
+      inset 0 1px 0 rgba(100,200,255,0.15),
+      inset 0 -1px 0 rgba(0,60,120,0.4);
+    min-height: 160px;
+    position: relative;
+  }
+
+  /* Holographic sheen sweep */
+  .credits-plate::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg,
+      transparent 0%,
+      transparent 30%,
+      rgba(100,220,255,0.04) 40%,
+      rgba(180,100,255,0.06) 50%,
+      rgba(0,255,200,0.04) 60%,
+      transparent 70%,
+      transparent 100%
+    );
+    border-radius: 10px;
+    pointer-events: none;
+    z-index: 1;
+    animation: holoSheen 4s ease-in-out infinite;
+  }
+
+  @keyframes holoSheen {
+    0%, 100% { opacity: 0.6; background-position: -200% center; }
+    50% { opacity: 1; }
+  }
+
+  /* Circuit trace lines */
+  .credits-plate::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(90deg, transparent 0%, transparent 40%, rgba(0,180,255,0.06) 40%, rgba(0,180,255,0.06) 41%, transparent 41%),
+      linear-gradient(0deg, transparent 0%, transparent 60%, rgba(0,180,255,0.05) 60%, rgba(0,180,255,0.05) 61%, transparent 61%),
+      linear-gradient(90deg, transparent 0%, transparent 70%, rgba(0,180,255,0.04) 70%, rgba(0,180,255,0.04) 71%, transparent 71%),
+      linear-gradient(0deg, transparent 0%, transparent 30%, rgba(0,180,255,0.04) 30%, rgba(0,180,255,0.04) 31%, transparent 31%);
+    border-radius: 10px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .credits-card-inner {
+    padding: 14px 16px 12px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .card-bank {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 7px;
+    color: rgba(0,220,255,0.9);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(0,220,255,0.7), 0 0 20px rgba(0,180,255,0.3);
+  }
+
+  /* Hologram orb replacing old chip */
+  .card-hologram {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      rgba(0,255,200,0.8),
+      rgba(0,150,255,0.8),
+      rgba(150,0,255,0.6),
+      rgba(255,0,150,0.5),
+      rgba(255,200,0,0.6),
+      rgba(0,255,200,0.8)
+    );
+    position: relative;
+    box-shadow:
+      0 0 12px rgba(0,200,255,0.6),
+      0 0 24px rgba(0,100,255,0.3),
+      inset 0 0 8px rgba(0,0,0,0.4);
+    animation: holoSpin 6s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes holoSpin {
+    from { filter: hue-rotate(0deg) brightness(1); }
+    to   { filter: hue-rotate(360deg) brightness(1.2); }
+  }
+
+  .card-hologram::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(200,240,255,0.4), rgba(0,10,30,0.9));
+    backdrop-filter: blur(2px);
+  }
+
+  .card-hologram::after {
+    content: '✦';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: rgba(200,240,255,0.9);
+    text-shadow: 0 0 6px cyan;
+  }
+
+  .card-mid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .card-number {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: rgba(160,210,255,0.8);
+    letter-spacing: 0.3em;
+    text-shadow: 0 0 8px rgba(0,180,255,0.4);
+  }
+
+  .card-scan-line {
+    height: 1px;
+    background: linear-gradient(90deg,
+      transparent,
+      rgba(0,200,255,0.4) 20%,
+      rgba(0,200,255,0.8) 50%,
+      rgba(0,200,255,0.4) 80%,
+      transparent
+    );
+    animation: scanPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes scanPulse {
+    0%, 100% { opacity: 0.3; transform: scaleX(0.7); }
+    50% { opacity: 1; transform: scaleX(1); }
+  }
+
+  .card-bottom {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+
+  .credits-label-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .credits-label-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 6px;
+    color: rgba(0,180,255,0.6);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+  }
+
+  .credits-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(0,200,255,0.3);
+    color: #00efff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    width: 130px;
+    outline: none;
+    text-shadow: 0 0 12px rgba(0,220,255,0.9), 0 0 24px rgba(0,180,255,0.4);
+    padding: 2px 0;
+    letter-spacing: 0.05em;
+  }
+  .credits-input:focus { border-bottom-color: rgba(0,220,255,0.7); }
+
+  .card-issuer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+  }
+
+  .card-issuer-rings {
+    display: flex;
+    align-items: center;
+  }
+
+  .card-ring {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid;
+    opacity: 0.85;
+  }
+  .card-ring:first-child {
+    border-color: rgba(0,220,255,0.9);
+    box-shadow: 0 0 6px rgba(0,200,255,0.5);
+  }
+  .card-ring:last-child  {
+    border-color: rgba(180,80,255,0.9);
+    margin-left: -8px;
+    box-shadow: 0 0 6px rgba(160,60,255,0.5);
+  }
+
+  .card-issuer-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 6px;
+    color: rgba(0,180,255,0.5);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── BAG ── */
+  .bag-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .bag-plate {
+    flex: 1;
+    padding: 10px 14px 14px;
+  }
+
+  .bag-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .bag-icon {
+    font-size: 18px;
+  }
+
+  .bag-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 5px;
+  }
+
+  .bag-item-input {
+    background: linear-gradient(145deg, #1a1c22, #13141a);
+    border: 1px solid rgba(90,95,110,0.4);
+    border-radius: 2px;
+    color: var(--text-bright);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    padding: 4px 6px;
+    outline: none;
+    width: 100%;
+  }
+  .bag-item-input:focus { border-color: var(--accent-cyan); }
+
+  .bag-capacity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(90,95,110,0.3);
+  }
+
+  .capacity-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 7px;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+  }
+
+  .capacity-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(0,229,255,0.2);
+    color: var(--wire-gold);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    width: 60px;
+    outline: none;
+    padding: 1px 3px;
+  }
+  .capacity-input:focus { border-bottom-color: var(--accent-gold); }
+
+  /* ── FOOTER ── */
+  .footer {
+    border-top: 1px solid var(--metal-shine);
+    padding: 8px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(0deg, rgba(0,10,20,0.4) 0%, transparent 100%);
+  }
+
+  .footer-code {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 8px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+  }
+
+  .mrz-strip {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 7px;
+    color: rgba(0,229,255,0.25);
+    letter-spacing: 0.1em;
+    text-align: center;
+  }
+
+  /* ── TWO COL LAYOUT ── */
+  .two-col {
+    display: flex;
+    gap: 10px;
+  }
+
+  .col-left { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  .col-right { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+
+  /* ── THEME TOGGLE BUTTON ── */
+  .theme-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 9999;
+    display: flex;
+    gap: 6px;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(0,229,255,0.3);
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    user-select: none;
+  }
+  .theme-toggle button {
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 4px;
+    color: var(--text-dim);
+    transition: background 0.2s, color 0.2s;
+  }
+  .theme-toggle button.active {
+    background: rgba(0,229,255,0.15);
+    color: var(--accent-cyan);
+  }
+
+  /* ── LIGHT THEME ── */
+  body[data-theme="light"] {
+    background: #e8edf2;
+    background-image: none;
+  }
+  body[data-theme="light"] .theme-toggle {
+    background: rgba(255,255,255,0.8);
+    border-color: rgba(0,80,160,0.25);
+  }
+  body[data-theme="light"] .theme-toggle button {
+    color: #4a5568;
+  }
+  body[data-theme="light"] .theme-toggle button.active {
+    background: rgba(0,80,180,0.1);
+    color: #005aaa;
+  }
+  body[data-theme="light"] .passport {
+    background: #ffffff;
+    border-color: #b0bac8;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.12);
+  }
+  body[data-theme="light"] .passport::before { opacity: 0; }
+  body[data-theme="light"] .header {
+    background: linear-gradient(90deg, #f0f4f8 0%, #e2e8f0 100%);
+    border-bottom-color: #c0ccd8;
+  }
+  body[data-theme="light"] .passport-title { color: #0a2a4a; text-shadow: none; }
+  body[data-theme="light"] .passport-subtitle { color: #3a5070; }
+  body[data-theme="light"] .passport-id { color: #5a7090; }
+  body[data-theme="light"] .header-right { color: #3a5070; border-left-color: #c0ccd8; }
+  body[data-theme="light"] .header-level-label { color: #4a6a8a; }
+  body[data-theme="light"] .header-level-input { color: #005a8a; border-bottom-color: rgba(0,80,160,0.35); }
+  body[data-theme="light"] .header-exp-input { color: #8a5a00; border-bottom-color: rgba(140,80,0,0.35); }
+  body[data-theme="light"] .status-dot { background: #22aa55; box-shadow: none; }
+  body[data-theme="light"] .wire-strip,
+  body[data-theme="light"] .wire-strip-bottom { opacity: 0.45; }
+  body[data-theme="light"] .plate {
+    background: #f5f8fc;
+    border-color: #c0ccd8;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  }
+  body[data-theme="light"] .section-header {
+    color: #0a3a6a;
+    border-bottom-color: rgba(0,60,120,0.15);
+  }
+  body[data-theme="light"] .field-label { color: #2a5a8a; }
+  .print-select-input { display: none; }
+  .etch-select {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(0,229,255,0.25);
+    color: var(--text-bright);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    width: 100%;
+    outline: none;
+    padding: 2px 2px 3px;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+  }
+  .etch-select:focus { border-bottom-color: var(--accent-cyan); }
+  .etch-select option {
+    background: #0e1018;
+    color: var(--text-bright);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+  }
+  .etch-select optgroup {
+    background: #060c18;
+    color: var(--accent-cyan);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+  }
+  body[data-theme="light"] .etch-select {
+    color: #0a2a4a;
+    border-bottom-color: rgba(0,60,120,0.2);
+  }
+  body[data-theme="light"] .etch-select option { background: #ffffff; color: #0a2a4a; }
+  body[data-theme="light"] .etch-select optgroup { background: #f0f4f8; color: #0a3a6a; }
+
+  /* Profession Ability Panel */
+  .prof-ability-plate {
+    margin-top: 8px;
+    display: block;
+  }
+  #prof-ability-print { display: none; }
+  @media print {
+    #prof-ability-screen { display: none !important; }
+    #prof-ability-print  { display: block !important; }
+  }
+  .prof-ability-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: var(--accent-cyan);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .prof-ability-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    color: var(--accent-gold, #c9a84c);
+    margin-bottom: 8px;
+    letter-spacing: 0.1em;
+  }
+  .prof-level-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 4px 0;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--text-dim);
+  }
+  .prof-level-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px;
+    color: var(--accent-gold, #c9a84c);
+    white-space: nowrap;
+    min-width: 2.8rem;
+    padding: 1px 4px;
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 2px;
+    text-align: center;
+  }
+  .prof-level-ability-name {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--text-bright);
+    font-size: 11px;
+  }
+  body[data-theme="light"] .prof-ability-title { color: #0a4a8a; }
+  body[data-theme="light"] .prof-ability-name { color: #7a5010; }
+  body[data-theme="light"] .prof-level-badge { color: #7a5010; border-color: rgba(122,80,16,0.3); }
+  body[data-theme="light"] .prof-level-ability-name { color: #0a2a4a; }
+  body[data-theme="light"] .prof-level-row { color: #2a4a6a; }
+  @media print {
+    .prof-ability-title { color: #0a4a8a !important; }
+    .prof-ability-name { color: #7a5010 !important; }
+    .prof-level-badge { color: #7a5010 !important; border-color: rgba(122,80,16,0.3) !important; }
+    .prof-level-ability-name { color: #0a2a4a !important; }
+    .prof-level-row { color: #2a4a6a !important; }
+  }
+  body[data-theme="light"] .etch-field::placeholder { color: #a0b0c0; }
+  body[data-theme="light"] .photo-frame {
+    background: #e0e8f0;
+    border-color: #a0b8d0;
+  }
+  body[data-theme="light"] .ability-box {
+    background: #e8f0f8;
+    border-color: #8aabcc;
+  }
+  body[data-theme="light"] .ability-box input { color: #0a2a4a; text-shadow: none; }
+  body[data-theme="light"] .ability-label span { color: #2a5a8a; }
+  body[data-theme="light"] .derived-label { color: #4a6a8a; }
+  body[data-theme="light"] .derived-box {
+    background: #dce8f4;
+    border-color: #8aabcc;
+  }
+  body[data-theme="light"] .derived-box input { color: #0a2a4a; }
+  body[data-theme="light"] .fraction-input { color: #1a6a2a !important; }
+  body[data-theme="light"] .fraction-slash { color: #4a6a8a; }
+  body[data-theme="light"] .defense-hex {
+    background: #fdeef0;
+    border-color: #c9304a;
+    box-shadow: none;
+  }
+  body[data-theme="light"] .defense-hex input {
+    color: #b02030;
+    text-shadow: none;
+  }
+  body[data-theme="light"] .rating-hex.atk {
+    background: #fff8e0;
+    border-color: #c08000;
+    box-shadow: none;
+  }
+  body[data-theme="light"] .rating-hex.atk input {
+    color: #9a6200;
+    text-shadow: none;
+  }
+  body[data-theme="light"] .rating-hex.dip {
+    background: #e0f6ff;
+    border-color: #0080aa;
+    box-shadow: none;
+  }
+  body[data-theme="light"] .rating-hex.dip input {
+    color: #005a80;
+    text-shadow: none;
+  }
+  body[data-theme="light"] .ap-sublabel { color: #2a5a8a; }
+  body[data-theme="light"] .ap-pip {
+    border-color: #4a8aaa;
+    background: #dceef8;
+  }
+  body[data-theme="light"] .ap-pip:checked { background: #0080aa; box-shadow: none; }
+  body[data-theme="light"] .condition-label { color: #3a5070; }
+  body[data-theme="light"] .fraction-input {
+    background: #eef4ff !important;
+    border-color: #8aabcc !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    color: #1a5a2a !important;
+  }
+  body[data-theme="light"] .fraction-slash { color: #4a6a8a; }
+  body[data-theme="light"] .condition-pip { border-color: #8aabcc; }
+  body[data-theme="light"] .condition-pip:checked { background: #c03050; }
+  body[data-theme="light"] .attack-input {
+    color: #0a2a4a;
+    border-bottom-color: rgba(0,60,120,0.2);
+  }
+  body[data-theme="light"] .attack-col-label { color: #4a6a8a; }
+  body[data-theme="light"] .feat-input { color: #0a2a4a; border-bottom-color: rgba(0,60,120,0.18); }
+  body[data-theme="light"] .feat-input.attr { color: #8a5a00; }
+  body[data-theme="light"] .feat-input.level { color: #005a8a; }
+  body[data-theme="light"] .feat-num { color: #6a8aaa; }
+  body[data-theme="light"] .clothing-slot-label { color: #005a8a; }
+  body[data-theme="light"] .clothing-item-input {
+    background: #f0f4f8;
+    border-color: #a0b8cc;
+    color: #0a2a4a;
+    border-bottom-color: rgba(0,60,120,0.18);
+  }
+  body[data-theme="light"] .clothing-item-input::placeholder { color: #a0b8cc; }
+  body[data-theme="light"] .armor-manifest-label { color: #8a5a00; }
+  body[data-theme="light"] .armor-manifest-input {
+    color: #7a4800;
+    border-bottom-color: rgba(140,80,0,0.3);
+  }
+  body[data-theme="light"] .credits-plate .credits-card-inner {
+    background: linear-gradient(135deg, #1a3a6a 0%, #0a1a3a 100%);
+  }
+  body[data-theme="light"] .bag-item-input {
+    background: #f0f4f8;
+    border-color: #a0b8cc;
+    color: #0a2a4a;
+    border-bottom-color: rgba(0,60,120,0.15);
+  }
+  body[data-theme="light"] .bag-item-input::placeholder { color: #9ab0c8; }
+  body[data-theme="light"] .capacity-label { color: #4a6a8a; }
+  body[data-theme="light"] .capacity-input {
+    color: #0a2a4a;
+    border-bottom-color: rgba(0,60,120,0.18);
+  }
+  body[data-theme="light"] .footer {
+    background: #e0e8f0;
+    border-top-color: #b0c0d0;
+  }
+  body[data-theme="light"] .footer-code { color: #4a6a8a; }
+  body[data-theme="light"] .rivet-br::before,
+  body[data-theme="light"] .rivet-br::after {
+    background: #a0b8cc;
+    box-shadow: none;
+  }
+
+  /* ── PRINT STYLES ── */
+  @media print {
+    @page { margin: 0.35in; size: letter portrait; }
+    .theme-toggle { display: none !important; visibility: hidden !important; }
+    body {
+      background: #ffffff !important;
+      background-image: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    /* ── Mirror light mode ── */
+    .passport {
+      width: 900px !important;
+      max-width: 900px !important;
+      box-shadow: none !important;
+      border: 1px solid #b0bac8 !important;
+      background: #ffffff !important;
+    }
+    .passport::before { opacity: 0 !important; }
+    .wire-strip, .wire-strip-bottom { opacity: 0.45 !important; }
+    .header { background: #f0f4f8 !important; border-bottom: 1px solid #c0ccd8 !important; }
+    .passport-title { color: #0a2a4a !important; text-shadow: none !important; }
+    .passport-subtitle { color: #3a5070 !important; }
+    .passport-id { color: #5a7090 !important; }
+    .header-level-label { color: #4a6a8a !important; }
+    .header-level-input { color: #005a8a !important; border-bottom-color: rgba(0,80,160,0.35) !important; }
+    .header-exp-input { color: #8a5a00 !important; border-bottom-color: rgba(140,80,0,0.35) !important; }
+    .header-right { color: #3a5070 !important; border-left-color: #c0ccd8 !important; }
+    .status-dot { background: #22aa55 !important; box-shadow: none !important; }
+    .plate {
+      background: #f5f8fc !important;
+      border: 1.5px solid #c0ccd8 !important;
+      box-shadow: none !important;
+    }
+    .plate::before, .plate::after {
+      background: #a0b8cc !important;
+      box-shadow: none !important;
+    }
+    .section-header { color: #0a3a6a !important; border-bottom-color: rgba(0,60,120,0.15) !important; text-shadow: none !important; }
+    .field-label { color: #2a5a8a !important; text-shadow: none !important; }
+    .etch-field { color: #0a2a4a !important; border-bottom-color: rgba(0,60,120,0.2) !important; }
+    .etch-select { color: #0a2a4a !important; border-bottom-color: rgba(0,60,120,0.2) !important; }
+    .ability-box { background: #e8f0f8 !important; border: 1px solid #8aabcc !important; box-shadow: none !important; }
+    .ability-box input { color: #0a2a4a !important; text-shadow: none !important; }
+    .ability-label span { color: #2a5a8a !important; text-shadow: none !important; }
+    .derived-box { background: #dce8f4 !important; border: 1px solid #8aabcc !important; box-shadow: none !important; }
+    .derived-box input { color: #0a2a4a !important; text-shadow: none !important; }
+    .derived-label { color: #4a6a8a !important; }
+    .fraction-input {
+      background: #eef4ff !important;
+      border-color: #8aabcc !important;
+      color: #1a5a2a !important;
+      box-shadow: none !important;
+      text-shadow: none !important;
+    }
+    .fraction-slash { color: #4a6a8a !important; }
+    .defense-hex { background: #fdeef0 !important; border: 2px solid #c9304a !important; box-shadow: none !important; }
+    .defense-hex input { color: #b02030 !important; text-shadow: none !important; }
+    .rating-hex.atk { background: #fff8e0 !important; border: 2px solid #c08000 !important; box-shadow: none !important; }
+    .rating-hex.atk input { color: #9a6200 !important; text-shadow: none !important; }
+    .rating-hex.dip { background: #e0f6ff !important; border: 2px solid #0080aa !important; box-shadow: none !important; }
+    .rating-hex.dip input { color: #005a80 !important; text-shadow: none !important; }
+    .ap-sublabel { color: #2a5a8a !important; }
+    .ap-pips { gap: 6px !important; }
+    .ap-pip {
+      appearance: none !important;
+      -webkit-appearance: none !important;
+      width: 14px !important; height: 14px !important;
+      border: 2px solid #4a8aaa !important;
+      border-radius: 3px !important;
+      background: #dceef8 !important;
+      box-shadow: none !important;
+    }
+    .ap-pip:checked { background: #0080aa !important; }
+    .condition-label { color: #3a5070 !important; }
+    .condition-pip {
+      appearance: none !important;
+      -webkit-appearance: none !important;
+      width: 12px !important; height: 12px !important;
+      border: 1px solid #8aabcc !important;
+      border-radius: 50% !important;
+      background: #ffffff !important;
+    }
+    .condition-pip:checked { background: #c03050 !important; }
+    .attack-input { color: #0a2a4a !important; border-bottom-color: rgba(0,60,120,0.2) !important; }
+    .attack-col-label { color: #4a6a8a !important; }
+    .feat-input { color: #0a2a4a !important; border-bottom-color: rgba(0,60,120,0.18) !important; }
+    .feat-input.attr { color: #8a5a00 !important; }
+    .feat-input.level { color: #005a8a !important; }
+    .feat-num { color: #6a8aaa !important; }
+    .clothing-slot-label { color: #005a8a !important; }
+    .clothing-item-input { background: #f0f4f8 !important; border-color: #a0b8cc !important; color: #0a2a4a !important; }
+    .armor-manifest-label { color: #8a5a00 !important; }
+    .armor-manifest-input { color: #7a4800 !important; border-bottom-color: rgba(140,80,0,0.3) !important; }
+    .bag-item-input { background: #f0f4f8 !important; border-color: #a0b8cc !important; color: #0a2a4a !important; }
+    .capacity-label { color: #4a6a8a !important; }
+    .capacity-input { color: #0a2a4a !important; border-bottom-color: rgba(0,60,120,0.18) !important; }
+    .rivet-br::before, .rivet-br::after { background: #a0b8cc !important; box-shadow: none !important; }
+    .footer { background: #e0e8f0 !important; border-top: 1px solid #b0c0d0 !important; }
+    .footer-code { color: #4a6a8a !important; }
+    /* Hide all placeholder text */
+    input::placeholder, textarea::placeholder { color: transparent !important; }
+    /* ── Fix first-row identity height inflation ── */
+    .id-left-group,
+    .id-right-group {
+      align-items: flex-start !important;
+    }
+    .name-plate,
+    .id-mini-plate {
+      min-height: 0 !important;
+      height: auto !important;
+    }
+    .etch-select {
+      height: 24px !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+      font-size: 11px !important;
+    }
+    /* Guide panel — last page in print */
+    .guide-panel {
+      page-break-before: always !important;
+      break-before: page !important;
+      border: none !important;
+      background: #f5f8fc !important;
+    }
+    .guide-header-bar {
+      background: #f0f4f8 !important;
+      border-bottom: 1px solid #c0ccd8 !important;
+    }
+    .guide-title { color: #0a2a4a !important; text-shadow: none !important; }
+    .guide-subtitle { color: #3a5070 !important; }
+    .guide-card {
+      background: #ffffff !important;
+      border: 1px solid #c0ccd8 !important;
+      box-shadow: none !important;
+    }
+    .guide-card-header { color: #0a3a6a !important; border-bottom-color: rgba(0,60,120,0.18) !important; text-shadow: none !important; }
+    .guide-field { color: #8a5a00 !important; }
+    .guide-entry { color: #1a2a3a !important; border-bottom-color: rgba(0,60,120,0.08) !important; }
+    .guide-note { color: #3a5070 !important; background: #e8f0f8 !important; border-left-color: #8aabcc !important; }
+  }
+
+  /* ── GUIDE PANEL STYLES ── */
+  .guide-panel {
+    width: 900px;
+    max-width: 900px;
+    margin: 28px auto 48px;
+    background: #0d0f18;
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    font-family: 'Rajdhani', sans-serif;
+  }
+  .guide-header-bar {
+    background: linear-gradient(90deg, #060c18 0%, #0a1428 100%);
+    border-bottom: 1px solid rgba(0,229,255,0.25);
+    padding: 14px 20px 12px;
+  }
+  .guide-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.22em;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 12px rgba(0,229,255,0.4);
+  }
+  .guide-subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.18em;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .guide-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+  }
+  .guide-card {
+    background: linear-gradient(145deg, #12141e, #0e1018);
+    border: 1px solid rgba(0,229,255,0.12);
+    border-radius: 3px;
+    padding: 10px 12px 12px;
+  }
+  .guide-card-header {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 8px rgba(0,229,255,0.3);
+    border-bottom: 1px solid rgba(0,229,255,0.15);
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+  }
+  .guide-entry {
+    display: flex;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-bright);
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.4;
+  }
+  .guide-entry:last-child { border-bottom: none; }
+  .guide-field {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--wire-gold);
+    white-space: nowrap;
+    min-width: 100px;
+    padding-top: 1px;
+  }
+  .guide-entry p { margin: 0; color: var(--text-muted, #7a8a9a); font-size: 11px; }
+  .guide-note {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    color: var(--text-dim);
+    background: rgba(0,229,255,0.04);
+    border-left: 2px solid rgba(0,229,255,0.25);
+    padding: 5px 8px;
+    margin-top: 8px;
+    line-height: 1.45;
+  }
+
+  /* Light theme overrides for guide */
+  body[data-theme="light"] .guide-panel {
+    background: #f2f5f9;
+    border-color: #c0ccd8;
+  }
+  body[data-theme="light"] .guide-header-bar {
+    background: linear-gradient(90deg, #e0e8f0 0%, #d4dde8 100%);
+    border-bottom-color: #b8c8d8;
+  }
+  body[data-theme="light"] .guide-title { color: #0a2a4a; text-shadow: none; }
+  body[data-theme="light"] .guide-subtitle { color: #4a6a8a; }
+  body[data-theme="light"] .guide-card {
+    background: #ffffff;
+    border-color: #c8d4e0;
+  }
+  body[data-theme="light"] .guide-card-header { color: #0a3a6a; text-shadow: none; border-bottom-color: rgba(0,60,120,0.15); }
+  body[data-theme="light"] .guide-field { color: #8a5a00; }
+  body[data-theme="light"] .guide-entry { color: #1a2a3a; border-bottom-color: rgba(0,0,0,0.05); }
+  body[data-theme="light"] .guide-entry p { color: #3a5060; }
+  body[data-theme="light"] .guide-note { color: #2a4a6a; background: #e8f0f8; border-left-color: #7aaabb; }
+</style>
+</head>
+<body data-theme="dark">
+
+<!-- Theme Toggle -->
+<div class="theme-toggle">
+  <button id="btn-dark" class="active" onclick="setTheme('dark')">&#9632; DARK</button>
+  <button id="btn-light" onclick="setTheme('light')">&#9788; LIGHT</button>
+  <button id="btn-print" onclick="window.print()">&#9113; PRINT</button>
+</div>
+
+<div class="passport">
+
+  <!-- Wire top strip -->
+  <div class="wire-strip"></div>
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="header">
+    <div class="logo-plate">
+      <!-- Cosmic Protocol Logo: stylized atom/galaxy symbol -->
+      <svg class="logo-svg" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer ring -->
+        <circle cx="30" cy="30" r="26" stroke="#00e5ff" stroke-width="1.5" stroke-dasharray="4 2" opacity="0.5"/>
+        <!-- Orbital ellipses -->
+        <ellipse cx="30" cy="30" rx="26" ry="8" stroke="#00e5ff" stroke-width="1.2" transform="rotate(0 30 30)" opacity="0.9"/>
+        <ellipse cx="30" cy="30" rx="26" ry="8" stroke="#ffb800" stroke-width="1.2" transform="rotate(60 30 30)" opacity="0.8"/>
+        <ellipse cx="30" cy="30" rx="26" ry="8" stroke="#00e5ff" stroke-width="1.2" transform="rotate(120 30 30)" opacity="0.7"/>
+        <!-- Center star -->
+        <circle cx="30" cy="30" r="4" fill="#00e5ff" opacity="0.9"/>
+        <circle cx="30" cy="30" r="6" fill="none" stroke="#00e5ff" stroke-width="0.8" opacity="0.4"/>
+        <!-- Sparks -->
+        <line x1="30" y1="4" x2="30" y2="10" stroke="#ffb800" stroke-width="1" opacity="0.7"/>
+        <line x1="30" y1="50" x2="30" y2="56" stroke="#ffb800" stroke-width="1" opacity="0.7"/>
+        <line x1="4" y1="30" x2="10" y2="30" stroke="#ffb800" stroke-width="1" opacity="0.7"/>
+        <line x1="50" y1="30" x2="56" y2="30" stroke="#ffb800" stroke-width="1" opacity="0.7"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <div class="passport-title">COSMIC PROTOCOL</div>
+      <div class="passport-subtitle">Universal Traveler's Identification Document · Galactic Passport</div>
+      <div class="passport-id">DOC-TYPE: CP-CHAR-V2 &nbsp;|&nbsp; ISSUED BY: STELLAR REGISTRY AUTHORITY &nbsp;|&nbsp; CLASSIFICATION: ACTIVE</div>
+      <div class="header-level-row">
+        <div class="header-level-group">
+          <span class="header-level-label">LVL</span>
+          <input class="header-level-input" type="text" maxlength="3" placeholder="1" spellcheck="false">
+        </div>
+        <div class="header-level-group">
+          <span class="header-level-label">EXP</span>
+          <input class="header-exp-input" type="text" maxlength="8" placeholder="0" spellcheck="false">
+        </div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div><span class="status-dot"></span>UPLINK ACTIVE</div>
+      <div>SECTOR: UNKNOWN</div>
+      <div>CLEARANCE: STANDARD</div>
+      <div style="margin-top:6px; font-size:8px; color:rgba(0,229,255,0.3);">■■■■■■■■■■■■■■</div>
+    </div>
+  </div>
+
+  <!-- ═══ BODY ═══ -->
+  <div class="body-wrapper">
+
+    <!-- ── IDENTITY + ATTRIBUTES (shared grid) ── -->
+    <div class="char-grid">
+
+      <!-- Name + Race group -->
+      <div class="id-left-group">
+        <div class="plate riveted-all name-plate" style="flex:2">
+          <div class="rivet-br rivet-bl"></div>
+          <div class="rivet-br rivet-br-pos"></div>
+          <span class="field-label">▸ REGISTERED DESIGNATION</span>
+          <input class="etch-field large" type="text" placeholder="ENTER NAME" spellcheck="false">
+        </div>
+        <!-- Race -->
+        <div class="plate riveted-all id-mini-plate">
+          <div class="rivet-br rivet-bl"></div>
+          <div class="rivet-br rivet-br-pos"></div>
+          <span class="field-label">▸ RACE / SPECIES</span>
+          <input class="etch-field" type="text" placeholder="——" spellcheck="false">
+        </div>
+      </div>
+
+        <!-- Caste + Profession group -->
+      <div class="id-right-group">
+        <div class="plate riveted-all id-mini-plate">
+          <div class="rivet-br rivet-bl"></div>
+          <div class="rivet-br rivet-br-pos"></div>
+          <span class="field-label">▸ CASTE / RANK</span>
+          <select class="etch-select" id="caste-select">
+            <option value="" disabled selected>——</option>
+            <option value="Royalty">Royalty</option>
+            <option value="Upper Echelon">Upper Echelon</option>
+            <option value="Skilled">Skilled</option>
+            <option value="Unmark">Unmark</option>
+          </select>
+          <input class="etch-field print-select-input" id="caste-print" type="text" placeholder="——" spellcheck="false">
+        </div>
+        <!-- Profession -->
+        <div class="plate riveted-all id-mini-plate">
+          <div class="rivet-br rivet-bl"></div>
+          <div class="rivet-br rivet-br-pos"></div>
+          <span class="field-label">▸ PROFESSION</span>
+          <select class="etch-select" id="profession-select">
+            <option value="" disabled selected>——</option>
+            <option data-caste="Royalty">Duke / Duchess</option>
+            <option data-caste="Royalty">Marquess / Marchioness</option>
+            <option data-caste="Royalty">Earl / Count / Countess</option>
+            <option data-caste="Royalty">Viscount / Viscountess</option>
+            <option data-caste="Royalty">Baron / Baroness</option>
+            <option data-caste="Royalty">Knight / Dame</option>
+            <option data-caste="Upper Echelon">Officer</option>
+            <option data-caste="Upper Echelon">Scientist</option>
+            <option data-caste="Upper Echelon">Doctor</option>
+            <option data-caste="Upper Echelon">Engineer</option>
+            <option data-caste="Upper Echelon">Navigator</option>
+            <option data-caste="Upper Echelon">Cultist</option>
+            <option data-caste="Upper Echelon">Mystic</option>
+            <option data-caste="Upper Echelon">Strategist</option>
+            <option data-caste="Upper Echelon">Diplomatic Attaché</option>
+            <option data-caste="Upper Echelon">Xenobiologist</option>
+            <option data-caste="Upper Echelon">Systems Architect</option>
+            <option data-caste="Upper Echelon">Intelligence Analyst</option>
+            <option data-caste="Upper Echelon">Logistics Coordinator</option>
+            <option data-caste="Skilled">Trader</option>
+            <option data-caste="Skilled">Technicon</option>
+            <option data-caste="Skilled">Coder</option>
+            <option data-caste="Skilled">Security Specialist</option>
+            <option data-caste="Skilled">Soldier</option>
+            <option data-caste="Skilled">Pilot</option>
+            <option data-caste="Skilled">Mechanic</option>
+            <option data-caste="Skilled">Miner</option>
+            <option data-caste="Skilled">Fabricator</option>
+            <option data-caste="Skilled">Communications Operator</option>
+            <option data-caste="Skilled">Quartermaster</option>
+            <option data-caste="Skilled">Field Medic</option>
+            <option data-caste="Skilled">Surveyor</option>
+            <option data-caste="Skilled">Starship Gunner</option>
+            <option data-caste="Skilled">Drone Operator</option>
+            <option data-caste="Skilled">Salvage Diver</option>
+            <option data-caste="Skilled">Terraforming Technician</option>
+            <option data-caste="Skilled">Freight Hauler</option>
+            <option data-caste="Unmark">Rogue</option>
+            <option data-caste="Unmark">Gang Enforcer</option>
+            <option data-caste="Unmark">Drifter</option>
+            <option data-caste="Unmark">Scavenger</option>
+            <option data-caste="Unmark">Smuggler</option>
+            <option data-caste="Unmark">Street Medic</option>
+          </select>
+          <input class="etch-field print-select-input" id="profession-print" type="text" placeholder="——" spellcheck="false">
+        </div>
+      </div>
+
+      <!-- Core Attributes -->
+      <div class="plate riveted-all abilities-plate">
+        <div class="rivet-br rivet-bl"></div>
+        <div class="rivet-br rivet-br-pos"></div>
+        <div class="section-header">◈ CORE ATTRIBUTES — PRIMARY STATISTICS</div>
+        <div class="abilities-row">
+          <div class="ability-cell">
+            <div class="ability-label"><span>S</span><span>T</span><span>R</span></div>
+            <div class="ability-box"><input type="text" maxlength="2" placeholder="—"></div>
+          </div>
+          <div class="ability-cell">
+            <div class="ability-label"><span>A</span><span>G</span><span>I</span></div>
+            <div class="ability-box"><input id="stat-agi" type="text" maxlength="2" placeholder="—"></div>
+          </div>
+          <div class="ability-cell">
+            <div class="ability-label"><span>V</span><span>I</span><span>G</span></div>
+            <div class="ability-box"><input type="text" maxlength="2" placeholder="—"></div>
+          </div>
+          <div class="ability-cell">
+            <div class="ability-label"><span>G</span><span>E</span><span>N</span></div>
+            <div class="ability-box"><input type="text" maxlength="2" placeholder="—"></div>
+          </div>
+          <div class="ability-cell">
+            <div class="ability-label"><span>C</span><span>U</span><span>N</span></div>
+            <div class="ability-box"><input type="text" maxlength="2" placeholder="—"></div>
+          </div>
+          <div class="ability-cell">
+            <div class="ability-label"><span>A</span><span>U</span><span>R</span></div>
+            <div class="ability-box"><input type="text" maxlength="2" placeholder="—"></div>
+          </div>
+        </div>
+        <div class="derived-row">
+          <div class="derived-cell">
+            <div class="derived-label">INITIATIVE</div>
+            <div class="derived-box"><input type="text" maxlength="2" placeholder="—"></div>
+          </div>
+          <div class="derived-cell">
+            <div class="derived-label">CARRY LIMIT</div>
+            <div class="derived-box"><input type="text" maxlength="3" placeholder="—"></div>
+          </div>
+          <div class="derived-cell">
+            <div class="derived-label">PSY RESIST</div>
+            <div class="derived-box"><input type="text" maxlength="2" placeholder="—"></div>
+          </div>
+          <div class="derived-cell">
+            <div class="derived-label">MOVEMENT</div>
+            <div class="derived-box"><input type="text" maxlength="2" placeholder="—"></div>
+          </div>
+        </div>
+        <!-- Combat Status merged -->
+        <div style="border-top: 1px solid rgba(0,229,255,0.15); margin-top:10px; padding-top:10px;">
+          <div class="section-header" style="margin-bottom:8px;">◈ COMBAT STATUS — FIELD CONDITION REGISTRY</div>
+          <div class="status-body">
+            <div class="ap-group">
+              <div class="ap-sublabel">◈ ACTION PTS</div>
+              <div class="ap-pips" id="ap-pips">
+                <input type="checkbox" class="ap-pip" id="ap-1" disabled>
+                <input type="checkbox" class="ap-pip" id="ap-2" disabled>
+                <input type="checkbox" class="ap-pip" id="ap-3" disabled>
+                <input type="checkbox" class="ap-pip" id="ap-4" disabled>
+              </div>
+            </div>
+            <div class="conditions-group">
+              <label class="condition-cell">
+                <input type="checkbox" class="condition-pip">
+                <span class="condition-label">WOUNDED</span>
+              </label>
+              <label class="condition-cell">
+                <input type="checkbox" class="condition-pip">
+                <span class="condition-label">STUNNED</span>
+              </label>
+              <label class="condition-cell">
+                <input type="checkbox" class="condition-pip">
+                <span class="condition-label">PRONE</span>
+              </label>
+              <label class="condition-cell">
+                <input type="checkbox" class="condition-pip">
+                <span class="condition-label">POISONED</span>
+              </label>
+              <label class="condition-cell">
+                <input type="checkbox" class="condition-pip">
+                <span class="condition-label">UNTETHERED</span>
+              </label>
+              <label class="condition-cell">
+                <input type="checkbox" class="condition-pip">
+                <span class="condition-label">PSY·LOUD</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vitals + Defense -->
+      <div class="vitals-col">
+        <div class="vitals-row">
+          <div class="plate riveted-all vitals-plate">
+            <div class="rivet-br rivet-bl"></div>
+            <div class="rivet-br rivet-br-pos"></div>
+            <span class="field-label">▸ HEALTH</span>
+            <div class="fraction-field">
+              <input class="fraction-input" type="text" maxlength="3" placeholder="0" style="color: var(--wire-green);">
+              <span class="fraction-slash">/</span>
+              <input class="fraction-input" type="text" maxlength="3" placeholder="0" style="color: var(--wire-green);">
+            </div>
+          </div>
+          <div class="plate riveted-all vitals-plate">
+            <div class="rivet-br rivet-bl"></div>
+            <div class="rivet-br rivet-br-pos"></div>
+            <span class="field-label">▸ STAMINA</span>
+            <div class="fraction-field">
+              <input class="fraction-input" type="text" maxlength="3" placeholder="0" style="color: var(--wire-gold);">
+              <span class="fraction-slash">/</span>
+              <input class="fraction-input" type="text" maxlength="3" placeholder="0" style="color: var(--wire-gold);">
+            </div>
+          </div>
+        </div>
+        <div class="plate riveted-all" style="padding: 10px 12px 14px; display:flex; flex-direction:column; gap:0; flex:1;">
+          <div class="rivet-br rivet-bl"></div>
+          <div class="rivet-br rivet-br-pos"></div>
+          <div class="section-header" style="margin-bottom:8px;">◈ COMBAT RATINGS</div>
+          <div style="display:flex; gap:10px; justify-content:space-between; align-items:flex-end;">
+            <div style="display:flex; flex-direction:column; align-items:center; gap:4px; flex:1;">
+              <span class="field-label">▸ ATTACK</span>
+              <div class="rating-hex atk">
+                <input type="text" maxlength="3" placeholder="0">
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:4px; flex:1;">
+              <span class="field-label">▸ DIPLOMATIC</span>
+              <div class="rating-hex dip">
+                <input type="text" maxlength="3" placeholder="0">
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:4px; flex:1;">
+              <span class="field-label">▸ DEFENSE</span>
+              <div class="defense-hex">
+                <input type="text" maxlength="3" placeholder="0">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── ATTACKS ── -->
+    <div class="plate riveted-all attacks-plate">
+      <div class="rivet-br rivet-bl"></div>
+      <div class="rivet-br rivet-br-pos"></div>
+      <div class="section-header">◈ COMBAT REGISTRY — AUTHORIZED ATTACK PROTOCOLS</div>
+      <!-- Column headers -->
+      <div class="attack-row" style="margin-bottom:2px; padding-bottom:4px; border-bottom: 1px solid rgba(0,229,255,0.2);">
+        <div class="attack-col-label">ATTACK</div>
+        <div class="attack-col-label">DESCRIPTION / EFFECT</div>
+        <div class="attack-col-label" style="text-align:center">RANGE</div>
+        <div class="attack-col-label" style="text-align:center">DAMAGE</div>
+        <div class="attack-col-label" style="text-align:center">ATTRIBUTE</div>
+      </div>
+      <!-- Attack 1: Bash (prefilled) -->
+      <div class="attack-row">
+        <input class="attack-input prefilled" type="text" value="BASH" spellcheck="false">
+        <input class="attack-input" type="text" placeholder="Melee strike — standard bludgeon" spellcheck="false">
+        <input class="attack-input" type="text" placeholder="MELEE" style="text-align:center">
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center">
+        <input class="attack-input" type="text" placeholder="STR" style="text-align:center; color:var(--wire-gold)">
+      </div>
+      <!-- Attack 2 -->
+      <div class="attack-row">
+        <input class="attack-input" type="text" placeholder="——" spellcheck="false">
+        <input class="attack-input" type="text" placeholder="——" spellcheck="false">
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center">
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center">
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center; color:var(--wire-gold)">
+      </div>
+      <!-- Attack 3 -->
+      <div class="attack-row">
+        <input class="attack-input" type="text" placeholder="——" spellcheck="false">
+        <input class="attack-input" type="text" placeholder="——" spellcheck="false">
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center">
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center">
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center; color:var(--wire-gold)">
+      </div>
+      <!-- Attack 4 -->
+      <div class="attack-row">
+        <input class="attack-input" type="text" placeholder="——" spellcheck="false">
+        <input class="attack-input" type="text" placeholder="——" spellcheck="false">
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center">
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center">
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center; color:var(--wire-gold)">
+      </div>
+    </div>
+
+    <!-- ── FEATS + PROFESSION ABILITIES ── -->
+    <div style="display:flex; gap:10px;">
+
+      <!-- FEAT REGISTRY -->
+      <div class="plate riveted-all feats-plate" style="flex:1">
+        <div class="rivet-br rivet-bl"></div>
+        <div class="rivet-br rivet-br-pos"></div>
+        <div class="section-header">◈ FEAT REGISTRY — SPECIAL ABILITY CODEX [10 SLOTS]</div>
+        <!-- Feat column headers -->
+        <div class="feat-row" style="margin-bottom:2px; padding-bottom:4px; border-bottom:1px solid rgba(0,229,255,0.2)">
+          <div style="font-family:'Orbitron',sans-serif;font-size:6px;color:var(--text-dim);letter-spacing:.2em;text-align:center">#</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:6px;color:var(--text-dim);letter-spacing:.2em">ATTRIBUTE</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:6px;color:var(--text-dim);letter-spacing:.2em">FEAT NAME</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:6px;color:var(--text-dim);letter-spacing:.2em;text-align:center">LEVEL</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">01</div>
+          <input class="feat-input attr" type="text" placeholder="ATTR" spellcheck="false">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">02</div>
+          <input class="feat-input attr" type="text" placeholder="ATTR" spellcheck="false">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">03</div>
+          <input class="feat-input attr" type="text" placeholder="ATTR" spellcheck="false">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">04</div>
+          <input class="feat-input attr" type="text" placeholder="ATTR" spellcheck="false">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">05</div>
+          <input class="feat-input attr" type="text" placeholder="ATTR" spellcheck="false">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">06</div>
+          <input class="feat-input attr" type="text" placeholder="ATTR" spellcheck="false">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">07</div>
+          <input class="feat-input attr" type="text" placeholder="ATTR" spellcheck="false">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">08</div>
+          <input class="feat-input attr" type="text" placeholder="ATTR" spellcheck="false">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">09</div>
+          <input class="feat-input attr" type="text" placeholder="ATTR" spellcheck="false">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">10</div>
+          <input class="feat-input attr" type="text" placeholder="ATTR" spellcheck="false">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3">
+        </div>
+      </div>
+
+      <!-- PROFESSION ABILITY REGISTRY -->
+      <div class="plate riveted-all feats-plate" id="prof-ability-plate" style="flex:1">
+        <div class="rivet-br rivet-bl"></div>
+        <div class="rivet-br rivet-br-pos"></div>
+        <!-- Screen: dynamic profession abilities -->
+        <div id="prof-ability-screen">
+          <div class="prof-ability-title">◈ PROFESSION ABILITY REGISTRY</div>
+          <div id="prof-ability-empty" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);margin-top:8px;">Select a profession to load abilities.</div>
+          <div class="prof-ability-name" id="prof-ability-name" style="display:none"></div>
+          <div id="prof-ability-list"></div>
+        </div>
+        <!-- Print: manual registry slots -->
+        <div id="prof-ability-print">
+        <div class="section-header">◈ PROFESSION ABILITY REGISTRY — CLASS CODEX [10 SLOTS]</div>
+        <!-- Column headers -->
+        <div class="feat-row" style="margin-bottom:2px; padding-bottom:4px; border-bottom:1px solid rgba(255,184,0,0.2)">
+          <div style="font-family:'Orbitron',sans-serif;font-size:6px;color:var(--text-dim);letter-spacing:.2em;text-align:center">#</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:6px;color:var(--text-dim);letter-spacing:.2em">PROFESSION</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:6px;color:var(--text-dim);letter-spacing:.2em">ABILITY NAME</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:6px;color:var(--text-dim);letter-spacing:.2em;text-align:center">LEVEL</div>
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">01</div>
+          <input class="feat-input" type="text" placeholder="PROF" spellcheck="false" style="color:var(--accent-cyan);font-size:9px;">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3" style="color:var(--wire-green);">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">02</div>
+          <input class="feat-input" type="text" placeholder="PROF" spellcheck="false" style="color:var(--accent-cyan);font-size:9px;">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3" style="color:var(--wire-green);">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">03</div>
+          <input class="feat-input" type="text" placeholder="PROF" spellcheck="false" style="color:var(--accent-cyan);font-size:9px;">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3" style="color:var(--wire-green);">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">04</div>
+          <input class="feat-input" type="text" placeholder="PROF" spellcheck="false" style="color:var(--accent-cyan);font-size:9px;">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3" style="color:var(--wire-green);">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">05</div>
+          <input class="feat-input" type="text" placeholder="PROF" spellcheck="false" style="color:var(--accent-cyan);font-size:9px;">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3" style="color:var(--wire-green);">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">06</div>
+          <input class="feat-input" type="text" placeholder="PROF" spellcheck="false" style="color:var(--accent-cyan);font-size:9px;">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3" style="color:var(--wire-green);">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">07</div>
+          <input class="feat-input" type="text" placeholder="PROF" spellcheck="false" style="color:var(--accent-cyan);font-size:9px;">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3" style="color:var(--wire-green);">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">08</div>
+          <input class="feat-input" type="text" placeholder="PROF" spellcheck="false" style="color:var(--accent-cyan);font-size:9px;">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3" style="color:var(--wire-green);">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">09</div>
+          <input class="feat-input" type="text" placeholder="PROF" spellcheck="false" style="color:var(--accent-cyan);font-size:9px;">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3" style="color:var(--wire-green);">
+        </div>
+        <div class="feat-row">
+          <div class="feat-num">10</div>
+          <input class="feat-input" type="text" placeholder="PROF" spellcheck="false" style="color:var(--accent-cyan);font-size:9px;">
+          <input class="feat-input" type="text" placeholder="——————————————————" spellcheck="false">
+          <input class="feat-input level" type="text" placeholder="Lv" maxlength="3" style="color:var(--wire-green);">
+        </div>
+        </div><!-- /prof-ability-print -->
+      </div>
+
+    </div>
+
+    <!-- ── CLOTHING + CREDITS ── -->
+    <div class="equipment-row">
+      <!-- Clothing -->
+      <div class="plate riveted-all clothing-plate">
+        <div class="rivet-br rivet-bl"></div>
+        <div class="rivet-br rivet-br-pos"></div>
+        <div class="section-header">◈ WORN EQUIPMENT — APPAREL MANIFEST</div>
+        <div class="clothing-grid">
+          <!-- Headgear -->
+          <div class="clothing-slot">
+            <div class="clothing-icon">🪖</div>
+            <div class="clothing-slot-label">HEADGEAR</div>
+            <input class="clothing-item-input" type="text" placeholder="slot 1" spellcheck="false">
+            <input class="clothing-item-input" type="text" placeholder="slot 2" spellcheck="false">
+          </div>
+          <!-- Torso -->
+          <div class="clothing-slot">
+            <div class="clothing-icon">🦺</div>
+            <div class="clothing-slot-label">TORSO</div>
+            <input class="clothing-item-input" type="text" placeholder="slot 1" spellcheck="false">
+            <input class="clothing-item-input" type="text" placeholder="slot 2" spellcheck="false">
+          </div>
+          <!-- Legs -->
+          <div class="clothing-slot">
+            <div class="clothing-icon">👖</div>
+            <div class="clothing-slot-label">LEGS</div>
+            <input class="clothing-item-input" type="text" placeholder="slot 1" spellcheck="false">
+            <input class="clothing-item-input" type="text" placeholder="slot 2" spellcheck="false">
+          </div>
+          <!-- Feet -->
+          <div class="clothing-slot">
+            <div class="clothing-icon">🥾</div>
+            <div class="clothing-slot-label">FEET</div>
+            <input class="clothing-item-input" type="text" placeholder="slot 1" spellcheck="false">
+            <input class="clothing-item-input" type="text" placeholder="slot 2" spellcheck="false">
+          </div>
+        </div>
+        <!-- Armor Manifest merged into Worn Equipment -->
+        <div class="armor-manifest-row">
+          <span class="armor-manifest-label">▸ ARMOR</span>
+          <div class="armor-manifest-field">
+            <span class="armor-manifest-field-label">TIER</span>
+            <input class="armor-manifest-input" type="text" maxlength="6" placeholder="—" spellcheck="false">
+          </div>
+          <div class="armor-manifest-field">
+            <span class="armor-manifest-field-label">MITIGATION</span>
+            <input class="armor-manifest-input" type="text" maxlength="4" placeholder="—" spellcheck="false">
+          </div>
+          <div class="armor-manifest-field">
+            <span class="armor-manifest-field-label">STEALTH PEN</span>
+            <input class="armor-manifest-input" type="text" maxlength="4" placeholder="—" spellcheck="false">
+          </div>
+        </div>
+      </div>
+
+      <!-- Credits Card -->
+      <div class="credits-plate">
+        <div class="credits-card-inner">
+          <div class="card-top">
+            <div>
+              <div class="card-bank">◈ GALACTIC CREDIT UNION</div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:6px;color:rgba(0,180,255,0.35);margin-top:3px;letter-spacing:0.2em">STELLAR RESERVE · INTERPLANETARY NETWORK</div>
+            </div>
+            <div class="card-hologram"></div>
+          </div>
+          <div class="card-mid">
+            <div class="card-number">████ ████ ████ ████</div>
+            <div class="card-scan-line"></div>
+          </div>
+          <div class="card-bottom">
+            <div class="credits-label-group">
+              <div class="credits-label-text">◈ CREDIT BALANCE</div>
+              <input class="credits-input" type="text" placeholder="0000" spellcheck="false">
+            </div>
+            <div class="card-issuer">
+              <div class="card-issuer-rings">
+                <div class="card-ring"></div>
+                <div class="card-ring"></div>
+              </div>
+              <div class="card-issuer-text">COSMO·PAY</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BAG ── -->
+    <div class="plate riveted-all bag-plate">
+      <div class="rivet-br rivet-bl"></div>
+      <div class="rivet-br rivet-br-pos"></div>
+      <div class="bag-header">
+        <span class="bag-icon">🎒</span>
+        <div class="section-header" style="border:none;margin:0;padding:0">◈ CARRIER MANIFEST — BAG CONTENTS</div>
+      </div>
+      <div class="bag-grid">
+        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
+      </div>
+      <div class="bag-capacity">
+        <span class="capacity-label">BAG TYPE:</span>
+        <input class="capacity-input" type="text" placeholder="Standard" spellcheck="false">
+        <span class="capacity-label" style="margin-left:16px">MAX CARRY WT:</span>
+        <input class="capacity-input" type="text" placeholder="——" spellcheck="false">
+        <span class="capacity-label">NOTES:</span>
+        <input class="capacity-input" type="text" placeholder="——————————————" spellcheck="false" style="width:200px">
+      </div>
+    </div>
+
+  </div><!-- /body-wrapper -->
+
+  <!-- Wire bottom strip -->
+  <div class="wire-strip-bottom"></div>
+
+  <!-- ═══ FOOTER ═══ -->
+  <div class="footer">
+    <div class="footer-code">COSMIC PROTOCOL · CHAR-SHEET · REV 2.1 · STELLAR REGISTRY AUTHORITY</div>
+    <div class="mrz-strip">CP&lt;GALACTIC&lt;PASSPORT&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>
+    <div class="footer-code">VOID WHERE PROHIBITED · VALID ACROSS ALL SECTORS</div>
+  </div>
+
+  <!-- ═══ FIELD GUIDE — LAST PAGE ═══ -->
+  <div class="guide-panel">
+  <div class="guide-header-bar">
+    <div class="guide-title">◈ GALACTIC PASSPORT — FIELD COMPLETION GUIDE</div>
+    <div class="guide-subtitle">OFFICIAL FORM INSTRUCTIONS · STELLAR REGISTRY AUTHORITY · DOC-TYPE: CP-GUIDE-V2 · CLASSIFICATION: STANDARD</div>
+  </div>
+  <div class="guide-grid">
+
+    <!-- § 00 Character Creation -->
+    <div class="guide-card">
+      <div class="guide-card-header">§ 00 · HOW TO CREATE YOUR CHARACTER — ATTRIBUTE GENERATION</div>
+      <div class="guide-entry">
+        <span class="guide-field">STEP 1 · BASE</span>
+        <p>Every character begins with <strong>10</strong> in each of the six Core Attributes — STR, AGI, VIG, GEN, CUN, and AUR. Write 10 in all six boxes before doing anything else.</p>
+      </div>
+      <div class="guide-entry">
+        <span class="guide-field">STEP 2 · BONUS POINTS</span>
+        <p>You have <strong>5 bonus points</strong> to distribute freely. Assign them to any Core Attribute(s) in any combination — you may stack all 5 into one attribute or spread them across several.</p>
+      </div>
+      <div class="guide-entry">
+        <span class="guide-field">STEP 3 · TRADE-OFFS</span>
+        <p>Choose up to <strong>3 attributes</strong> to reduce. Remove any number of points from each chosen attribute (minimum of 1 removed per chosen attribute). Every point removed becomes a free point you may add to any of the six Core Attributes, including the ones you reduced.</p>
+      </div>
+      <div class="guide-note">
+        EXAMPLE — Start: all 10s. Bonus: +3 STR, +2 AUR → STR 13, AUR 12. Trade-off: remove 2 from AGI and 1 from GEN → gain 3 free points → +2 VIG, +1 CUN. Final: STR 13 · AGI 8 · VIG 12 · GEN 9 · CUN 11 · AUR 12.<br><br>
+        There is no upper cap during character creation. Your Race and Profession may grant additional bonuses applied after these steps — see the rulebook for details.
+      </div>
+    </div>
+
+    <!-- § 01 Identity -->
+    <div class="guide-card">
+      <div class="guide-card-header">§ 01 · IDENTITY MANIFEST</div>
+      <div class="guide-entry"><span class="guide-field">DESIGNATION</span><p>Your character's full name as registered with the Stellar Registry.</p></div>
+      <div class="guide-entry"><span class="guide-field">RACE / SPECIES</span><p>Your biological species — e.g. Human, Veylin, Grohl, Mekavian.</p></div>
+      <div class="guide-entry"><span class="guide-field">CASTE / RANK</span><p>Your social standing, military rank, or faction title. <strong>Royalty — Noblesse Oblige:</strong> Once per rest, grant +2 to a non-Royal party member's roll (or a Royal of lower status), declared before the roll. Cannot be given to the same party member two sessions in a row. If the blessed roll fails, Noblesse Oblige is unavailable until next rest.</p></div>
+      <div class="guide-entry"><span class="guide-field">PROFESSION</span><p>Your character class — e.g. Soldier, Psi-Tender, Broker, Scout.</p></div>
+    </div>
+
+    <!-- § 02 Core Attributes -->
+    <div class="guide-card">
+      <div class="guide-card-header">§ 02 · CORE ATTRIBUTES — PRIMARY STATISTICS</div>
+      <div class="guide-entry"><span class="guide-field">STR · Strength</span><p>Physical power. Governs melee damage and feats of brute force.</p></div>
+      <div class="guide-entry"><span class="guide-field">AGI · Agility</span><p>Speed and precision. Used for ranged attacks, evasion, and stealth. Also determines your Action Points (see § 03).</p></div>
+      <div class="guide-entry"><span class="guide-field">VIG · Vigor</span><p>Endurance and resilience. Determines maximum Health.</p></div>
+      <div class="guide-entry"><span class="guide-field">GEN · Genius</span><p>Intelligence. Covers hacking, medicine, and technical knowledge.</p></div>
+      <div class="guide-entry"><span class="guide-field">CUN · Cunning</span><p>Wits and perception. Used for traps, insight, tracking, and trickery.</p></div>
+      <div class="guide-entry"><span class="guide-field">AUR · Aura</span><p>Force of personality and Psionic potential. Governs persuasion and mental abilities.</p></div>
+      <div class="guide-entry"><span class="guide-field">ATTRIBUTE MODIFIER</span><p>Each point <strong>above 10</strong> in any attribute grants <strong>+1</strong> to rolls and effects that use it. Each <strong>2 points below 10</strong> apply a <strong>−2</strong> penalty. Partial odd-numbered deficits round down.</p></div>
+      <div class="guide-note">
+        MODIFIER TABLE &nbsp;·&nbsp; 10 = ±0 &nbsp;·&nbsp; 11 = +1 &nbsp;·&nbsp; 12 = +2 &nbsp;·&nbsp; 13 = +3 &nbsp;·&nbsp; 14 = +4…<br>
+        9 = −2 &nbsp;·&nbsp; 8 = −2 &nbsp;·&nbsp; 7 = −4 &nbsp;·&nbsp; 6 = −4 &nbsp;·&nbsp; 5 = −6…<br>
+        DERIVED — Initiative: turn order roll. Carry Limit: STR×2. Psy Resist: AUR mod. Movement: tiles per action.
+      </div>
+    </div>
+
+    <!-- § 03 Combat Status -->
+    <div class="guide-card">
+      <div class="guide-card-header">§ 03 · COMBAT STATUS — FIELD CONDITION REGISTRY</div>
+      <div class="guide-entry"><span class="guide-field">ACTION POINTS</span><p>You gain <strong>1 Action Point for every 5 AGI</strong> you have, up to a maximum of <strong>4</strong>. Calculate at character creation and update whenever AGI changes. Check a pip when spending an action; clear all pips at the start of your turn.</p></div>
+      <div class="guide-note">AP TABLE &nbsp;·&nbsp; AGI 1–4 = 0 AP &nbsp;·&nbsp; AGI 5–9 = 1 AP &nbsp;·&nbsp; AGI 10–14 = 2 AP &nbsp;·&nbsp; AGI 15–19 = 3 AP &nbsp;·&nbsp; AGI 20+ = 4 AP (max)</div>
+      <div class="guide-entry"><span class="guide-field">WOUNDED</span><p>Ongoing injury — may impose penalties to rolls per GM ruling.</p></div>
+      <div class="guide-entry"><span class="guide-field">STUNNED</span><p>You lose your next available action. Clear after skipping one action.</p></div>
+      <div class="guide-entry"><span class="guide-field">PRONE</span><p>On the ground. Gain cover vs ranged attacks; melee attacks against you have advantage.</p></div>
+      <div class="guide-entry"><span class="guide-field">POISONED</span><p>Taking ongoing damage each round; see the source item or ability for the amount.</p></div>
+      <div class="guide-entry"><span class="guide-field">UNTETHERED</span><p>Floating in zero-gravity or otherwise unanchored from a surface.</p></div>
+      <div class="guide-entry"><span class="guide-field">PSY·LOUD</span><p>Your Psionic signature is broadcasting and can be detected by sensitive creatures or equipment.</p></div>
+    </div>
+
+    <!-- § 04 Health & Stamina -->
+    <div class="guide-card">
+      <div class="guide-card-header">§ 04 · HEALTH &amp; STAMINA — VITALS</div>
+      <div class="guide-entry"><span class="guide-field">HEALTH (green)</span><p>Physical hit points. Left box = current HP; right box = maximum HP. Reaching 0 means incapacitation or death.</p></div>
+      <div class="guide-entry"><span class="guide-field">STAMINA (gold)</span><p>Exertion pool spent by feats and special abilities. Left = current; right = maximum. Fully replenishes after a full rest.</p></div>
+      <div class="guide-note">Max Health is typically VIG × a class multiplier. Max Stamina is set by your Profession. Consult the rulebook for exact formulas.</div>
+    </div>
+
+    <!-- § 05 Combat Ratings -->
+    <div class="guide-card">
+      <div class="guide-card-header">§ 05 · COMBAT RATINGS</div>
+      <div class="guide-entry"><span class="guide-field">ATTACK ▸ gold</span><p>Your total attack bonus added to weapon rolls when making an offensive action.</p></div>
+      <div class="guide-entry"><span class="guide-field">DIPLOMATIC ▸ cyan</span><p>Your social and negotiation bonus used in non-combat conflicts, persuasion checks, and diplomatic encounters.</p></div>
+      <div class="guide-entry"><span class="guide-field">DEFENSE ▸ red</span><p>The number enemies must meet or exceed on their attack roll to hit you. Includes armor, AGI, and any bonuses.</p></div>
+    </div>
+
+    <!-- § 06 Combat Registry -->
+    <div class="guide-card">
+      <div class="guide-card-header">§ 06 · COMBAT REGISTRY — AUTHORIZED ATTACK PROTOCOLS</div>
+      <div class="guide-entry"><span class="guide-field">ATTACK</span><p>Name of the weapon, power, or technique (e.g. Plasma Rifle, Neural Shock).</p></div>
+      <div class="guide-entry"><span class="guide-field">DESCRIPTION</span><p>What the attack does — damage type, special rules, or conditions it inflicts.</p></div>
+      <div class="guide-entry"><span class="guide-field">RANGE</span><p>MELEE · SHORT · MEDIUM · LONG · or a specific tile/meter distance.</p></div>
+      <div class="guide-entry"><span class="guide-field">DAMAGE</span><p>Dice notation for damage rolled — e.g. 2d6, 1d8+STR, 3d4.</p></div>
+      <div class="guide-entry"><span class="guide-field">ATTRIBUTE</span><p>The core stat used for the attack roll — STR for melee, AGI for ranged, AUR for Psionic.</p></div>
+      <div class="guide-note">BASH is pre-filled as the universal unarmed strike available to all characters at no cost.</div>
+    </div>
+
+    <!-- § 07 Feat Registry -->
+    <div class="guide-card">
+      <div class="guide-card-header">§ 07 · FEAT REGISTRY — SPECIAL ABILITY CODEX</div>
+      <div class="guide-entry"><span class="guide-field">ATTRIBUTE</span><p>The core stat this feat scales with (e.g. STR, AUR, GEN). Used to calculate the feat's effect.</p></div>
+      <div class="guide-entry"><span class="guide-field">FEAT NAME</span><p>Full name of the feat as listed in the rulebook. Feats are universal — any character can learn them.</p></div>
+      <div class="guide-entry"><span class="guide-field">LEVEL</span><p>Current rank of this feat. Most feats can be upgraded multiple levels by spending experience. Enter the numeral (1, 2, 3…).</p></div>
+      <div class="guide-note">Up to 10 feat slots are available. Leave unused rows blank. Consult Chapter II of the rulebook for the full feat list.</div>
+    </div>
+
+    <!-- § 08 Profession Abilities -->
+    <div class="guide-card">
+      <div class="guide-card-header">§ 08 · PROFESSION ABILITY REGISTRY — CLASS CODEX</div>
+      <div class="guide-entry"><span class="guide-field">PROFESSION</span><p>The class or profession column this ability belongs to — e.g. SOLDIER, PSI-TENDER, BROKER.</p></div>
+      <div class="guide-entry"><span class="guide-field">ABILITY NAME</span><p>Full name of the class ability as listed in your Profession's codex in the rulebook.</p></div>
+      <div class="guide-entry"><span class="guide-field">LEVEL</span><p>Current rank of this class ability. Class abilities unlock and upgrade as your character levels.</p></div>
+      <div class="guide-note">Up to 10 slots. Characters with multiple professions may record abilities from each. See Chapter III for profession ability trees.</div>
+    </div>
+
+    <!-- § 09 Worn Equipment -->
+    <div class="guide-card">
+      <div class="guide-card-header">§ 09 · WORN EQUIPMENT — APPAREL MANIFEST</div>
+      <div class="guide-entry"><span class="guide-field">HEADGEAR</span><p>Helmets, visors, tactical goggles, earpieces, hats. Up to 2 items.</p></div>
+      <div class="guide-entry"><span class="guide-field">TORSO</span><p>Jackets, armor vests, tactical rigs, bodysuits. Up to 2 items.</p></div>
+      <div class="guide-entry"><span class="guide-field">LEGS</span><p>Pants, greaves, knee pads, exo-frame legs. Up to 2 items.</p></div>
+      <div class="guide-entry"><span class="guide-field">FEET</span><p>Boots, mag-clamps, jet-skates, anti-grav soles. Up to 2 items.</p></div>
+      <div class="guide-entry"><span class="guide-field">ARMOR · TIER</span><p>The armor category worn: LIGHT, MEDIUM, HEAVY, or EXO-FRAME.</p></div>
+      <div class="guide-entry"><span class="guide-field">MITIGATION</span><p>Flat damage reduction applied to every hit received while wearing this armor.</p></div>
+      <div class="guide-entry"><span class="guide-field">STEALTH PEN</span><p>Penalty applied to stealth checks due to armor bulk and noise. Heavier armor = higher penalty.</p></div>
+    </div>
+
+    <!-- § 10 + § 11 -->
+    <div class="guide-card">
+      <div class="guide-card-header">§ 10 · GALACTIC CREDIT UNION — CREDIT BALANCE &nbsp;&nbsp;|&nbsp;&nbsp; § 11 · CARRIER MANIFEST — BAG CONTENTS</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <div class="guide-entry"><span class="guide-field">CREDIT BALANCE</span><p>Enter your current credit total. 1 cr = 1 standard galactic credit. Deduct when spending at licensed merchants or during downtime transactions.</p></div>
+          <div class="guide-note">The credit card number field is decorative — your actual balance is the editable field at the bottom of the card panel.</div>
+        </div>
+        <div>
+          <div class="guide-entry"><span class="guide-field">ITEM SLOTS (×12)</span><p>Each of the 12 slots holds one item or a stack of identical consumables (e.g. 3× Ration Bar). Write the item name clearly.</p></div>
+          <div class="guide-entry"><span class="guide-field">BAG TYPE</span><p>The container you're carrying — Standard Pack, Tactical Rig, Void Satchel, Crate, etc.</p></div>
+          <div class="guide-entry"><span class="guide-field">MAX CARRY WT</span><p>Your current carry capacity in kg or units. Cross-reference with Carry Limit in Core Attributes (§ 02).</p></div>
+          <div class="guide-entry"><span class="guide-field">NOTES</span><p>Any relevant bag modifiers, magical properties, or special conditions applied to the container.</p></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  </div>
+
+</div>
+
+<script>
+  function setTheme(t) {
+    document.body.setAttribute('data-theme', t);
+    document.getElementById('btn-dark').classList.toggle('active', t === 'dark');
+    document.getElementById('btn-light').classList.toggle('active', t === 'light');
+    localStorage.setItem('cp-theme', t);
+  }
+  // Restore saved preference
+  (function() {
+    var saved = localStorage.getItem('cp-theme');
+    if (saved) setTheme(saved);
+  })();
+
+  // ── Profession Ability Data ──────────────────────────────────────
+  const PROF_ABILITIES = {
+    "Duke / Duchess": { bonus: "+2 to High Diplomacy Actions", levels: ["Voice of Authority — Once per session, issue a command that forces one NPC to hesitate for 1 round before acting against you.","Noble Network — May call in a political favour once per session: gain access to restricted information, safe passage, or a neutral NPC ally.","Territorial Claim — Designate one location per session as under your protection. Allies within gain +1 to all saves.","Imperial Decree — Nullify one hostile social action (bribery, intimidation, arrest) directed at the party. No roll required.","Grand Alliance — Permanently secure one faction as a minor ally. They provide intel or resources once between each major rest.","Sovereign Will — Once per session your word overrides any non-royal NPC directive. On a failed Aura check the effect still holds but a political consequence follows."] },
+    "Marquess / Marchioness": { bonus: "+2 to Combat Leadership & Diplomatic Negotiation", levels: ["Border Instinct — You are never surprised in ambushes. You may warn one ally before initiative is rolled.","Frontier Discipline — Allies under your direct command gain +1 to attack rolls on the first round of combat.","Defensive Line — Once per combat, declare a position. Enemies must pass an Aura check to advance past it without penalty.","War Diplomat — May negotiate a temporary ceasefire mid-combat. All parties pause 1 round; either side may resume but gains no surprise bonus.","Fortified Command — Once per session, establish a field HQ. Allies resting within regain +5 Stamina instead of the normal rest amount.","Iron Frontier — Your presence deters aggression. Enemies with lower Aura than yours must pass a Cunning check to initiate combat."] },
+    "Earl / Count / Countess": { bonus: "+2 to Governance, Logistics, or Trade Oversight", levels: ["Ledger Eye — Instantly know if an item is overpriced, underpriced, or counterfeit. +1 to all appraisal rolls.","Provincial Contacts — In any settled location, locate a black-market vendor, informant, or safe house (DC 10 Cunning).","Administrative Override — Once per session, redirect a shipment, permit, or bureaucratic ruling in the party's favour.","Trade Monopoly — Declare one commodity. Party pays half price and sells at full price for that commodity until next major rest.","Economic Leverage — Once per session, threaten financial ruin to coerce one faction NPC. Aura check or they become hostile.","Regional Authority — Within a designated region, your word is law. Local enforcers won't act against you without higher noble orders."] },
+    "Viscount / Viscountess": { bonus: "+2 to Law, Order, and Enforcement Actions", levels: ["Legal Precedent — Once per session, cite obscure law to delay or dismiss a legal action against the party.","Deputy's Writ — May deputise one party member, granting them temporary legal authority in the current jurisdiction.","Enforcement Network — Call in one local patrol to assist in a non-combat situation once per session.","Summary Judgement — May sentence a captured NPC without trial. Sticks unless overturned by a higher authority.","Martial Law — Once per session, declare martial law in one zone. All civilian movement freezes 1 hour; guards obey unconditionally.","Inquisitor's Eye — Detect deception automatically on a DC 12 Genius check. NPCs cannot bluff you without a contested roll."] },
+    "Baron / Baroness": { bonus: "+2 to Local Influence & Resource Management", levels: ["Local Legend — In any settlement of 500 or fewer, you are known. NPCs start neutral-to-friendly.","Outpost Rights — Claim one building per session as a temporary base. Allies resting there are not disturbed.","Resource Stockpile — Once per session, produce common gear (rations, basic ammo, medkits) for the whole party.","Petty Court — Hold an informal court. One NPC dispute is resolved in your favour without a roll if no higher authority intervenes.","Fortify Position — Spend 1 Action to call local militia reinforcements (1d4 armed NPCs) once per combat encounter.","Domain Mastery — Any region you have visited may be declared under your influence; gain advantage on all social rolls there."] },
+    "Knight / Dame": { bonus: "+1 Combat Bonus", levels: ["Sworn Oath — Declare one party member your ward. While adjacent, they gain +1 to all defense rolls.","Challenge — Once per combat, declare a duel. The target must focus attacks on you for 2 rounds or lose 1 AP.","Valorous Strike — Once per combat, a melee attack that drops a target to 0 HP restores 5 Stamina to you.","Unbreakable Honour — Immune to morale-breaking effects. Allies within 2 hexes gain the same immunity while you stand.","Champion's Reach — Melee range extends by 1 hex. On a critical hit, knock target back 1 hex.","Legendary Valor — Once per session, after a hit that would reduce you below 1 HP, remain at 1 HP and take a free attack."] },
+    "Officer": { bonus: "+2 to Command & Tactical Actions", levels: ["Tactical Briefing — Before combat, grant one ally +1 to their first attack roll this encounter.","Fire Discipline — Once per combat, order a coordinated volley. Two allies may make ranged attacks simultaneously on your turn.","Flank Coordination — Allies you direct gain flanking bonus (+1 attack) even if only one attacker is adjacent.","Chain of Command — If incapacitated, designate a second-in-command who inherits your command bonuses for the encounter.","Operational Control — Once per session, call in military support: supply drop, extraction craft, or artillery strike.","Supreme Commander — All command bonuses +1. Allies ignore the first Wound penalty while within your line of sight."] },
+    "Scientist": { bonus: "+2 to Research, Analysis & Scientific Procedure", levels: ["Rapid Analysis — Identify any substance, technology, or anomaly with a DC 10 Genius check as a free action.","Field Hypothesis — Once per session, propose an untested theory. If successful, gain +2 to the next related roll.","Experimental Prototype — Craft a single-use experimental device from available parts.","Pattern Recognition — After observing an enemy for 1 round, identify one weakness. Next ally to attack gains +2.","Theoretical Breakthrough — Once per session, bypass one obstacle where conventional methods would fail.","Applied Mastery — All Genius-based rolls made with advantage. Failed analysis reveals partial information."] },
+    "Doctor": { bonus: "+2 to Medical Treatment & Biological Assessment", levels: ["Triage — Stabilise a dying ally as a 1-Action bonus. They recover to 1 HP instead of bleeding out.","Pain Management — Remove the Wounded penalty from one ally until their next rest. Requires 1 minute.","Stimulant Injection — Once per encounter, restore 10 HP to a target.","Surgical Precision — Surgery (short rest, DC 14 Genius) restores 25 HP and removes one persistent condition.","Biological Intuition — Identify any disease or toxin on sight. Improvise a treatment on a DC 12 Genius check.","Miracle Work — Once per session, bring a character back from 0 HP to 10 HP without supplies (dead < 1 round)."] },
+    "Engineer": { bonus: "+2 to Repair, Construction & Engineering", levels: ["Emergency Patch — Restore a broken system to minimal function in 1 round using improvised materials.","Structural Exploit — Identify and trigger a structural weakness in a wall, vehicle, or installation once per session.","Power Reroute — Redirect power to double one system's output for 3 rounds (another system goes offline).","Jury Rig — Construct a functional device from scavenged parts. One use only.","Master Blueprint — Given 1 hour and materials, construct a fortification, trap, or vehicle modification.","Systems Genius — Any ship or facility you spend 10 minutes in is fully mapped. Sabotage or repair any system free once per session."] },
+    "Navigator": { bonus: "+2 to Navigation & Spatial Calculation", levels: ["Dead Reckoning — Never truly lost. Estimate position with a DC 10 Genius check without instruments.","Safe Passage — Plot a route that avoids one known hazard without a roll.","Void Current — Identify a fast route. Reduce travel time by 25% with no additional risk.","Evasive Astrogation — During pursuit, your route gives the ship advantage on evasion rolls for 3 rounds.","Chart the Unknown — Once per session, chart an unmapped region and gain one strategic advantage of your choice.","Stellar Intuition — Predict gravitational events and Void anomalies. Never caught off-guard by space environmental hazards."] },
+    "Cultist": { bonus: "+2 to Dark Ritual, Corruption & Malevolent Psionic Actions", levels: ["Dark Whisper — Plant a suggestion in a target's mind. On a failed Aura save they believe one false statement for 1 hour.","Hex Anchor — Shadow Mark persists for 2 rounds instead of ending after 1 roll.","Blood Pact — Sacrifice 10 HP to make any one d20 roll this turn an automatic 20. Cannot use while in Frenzy.","Corrupting Touch — Melee hit inflicts Corruption: target loses 1 AP next round. Stacks twice.","Ritual Feedback — When a cursed target fails a save, regain 5 HP.","Void Conduit — Once per session, channel dark energy. All enemies within 2 hexes suffer Shadow Mark simultaneously. You take 15 HP backlash."] },
+    "Mystic": { bonus: "+2 to Spiritual Attunement, Psionic Healing & Benevolent Ritual Actions", levels: ["Calm Aura — Hostile NPCs within 3 hexes must pass a DC 11 Cunning check before attacking you.","Mending Light — Once per rest outside Fasting, restore 8 HP to a willing target as a 1-Action heal.","Purify — Remove one negative condition (poisoned, cursed, hexed) with a DC 12 Aura check.","Spiritual Link — Bond with one ally per session. If they drop to 0 HP, they drop to 5 HP instead. You take 10 HP in their place.","Fasting Mastery — While Fasting, the d20 threshold drops to 8+. AP reduction is 1 instead of 2.","Celestial Conduit — Once per session, all allies within 3 hexes regain 15 HP and remove one condition. Your Stamina drops to 1."] },
+    "Strategist": { bonus: "+2 to Strategic Planning & Predictive Analysis", levels: ["Battle Plan — Before an encounter, grant the party +1 to initiative rolls.","Calculated Risk — Once per session, re-roll any one party member's die. You must accept the new result.","Predict Pattern — After 1 round of observation, predict an enemy's next action. Party gains +2 to relevant saves that round.","Resource Allocation — Once per session, redistribute one consumable resource between party members as a free action.","Contingency Plan — Declare one contingency at session start. If that situation arises, the party auto-succeeds the first roll.","Grand Strategy — Once per session, restructure the encounter: swap initiative order, reposition two allies, force one enemy delay."] },
+    "Diplomatic Attaché": { bonus: "+2 to Negotiation & Diplomatic Mediation", levels: ["Common Ground — Identify one shared interest between opposing parties. +2 to the next negotiation roll.","Neutral Ground — Declare a parley. All parties engage non-violently for at least 1 round or be branded the aggressor.","Linguistic Adaptation — After 1 minute of exposure, understand the gist of any language or comm signal.","Back-Channel Deal — Whisper a private arrangement to one NPC during a social encounter; resolved separately with the GM.","Faction Envoy — Party reputation with one faction improves one tier after any successful interaction you lead.","Binding Treaty — Once per session, broker a formal agreement. Both parties must honour it; violations incur political fallout."] },
+    "Xenobiologist": { bonus: "+2 to Alien Biology & Environmental Analysis", levels: ["Threat Assessment — Identify if an alien creature is hostile, territorial, or passive before engagement (DC 10 Genius).","Biological Resilience — Immune to naturally occurring alien toxins and mild pathogens.","Specimen Study — After 1 round observing a creature, identify one vulnerability. Allies gain +1 on next attack against that type.","Pheromone Lure — Craft a scent-based lure that attracts or repels one creature type for up to 10 minutes.","Adaptive Physiology — Ignore penalties from alien atmospheres, pressure, and temperature for up to 1 hour.","Apex Understanding — Once per session, communicate basic intent to any living creature. It won't attack you unprovoked for 10 minutes."] },
+    "Systems Architect": { bonus: "+2 to System Design & Optimization", levels: ["Architecture Read — Understand the layout and logic of any technological system after 1 minute of inspection.","Optimization Patch — Improve any system's performance by 20% without additional resources.","Backdoor Install — Plant a hidden access point in any networked system. Reuse it once later in the session.","System Overload — Force a target system into critical failure for 2 rounds.","Modular Rebuild — Reconstruct a destroyed system from 50% of its parts in half normal time.","Masterwork Design — Once per session, architect a modification that grants the party a persistent tactical advantage."] },
+    "Intelligence Analyst": { bonus: "+2 to Intelligence Gathering & Analysis", levels: ["Dossier — Before any encounter, request one piece of known intel about the target from the GM.","Pattern Lock — After observing an NPC for 2 rounds, predict their next move. +2 to saves against that target's actions.","Cover Identity — Maintain one false identity per session. NPCs with lower Cunning accept without a roll.","Signal Intercept — Tap any active communication stream. Listen to enemy plans for up to 3 rounds undetected.","Disinformation — Plant false intel with an enemy faction once per session.","Threat Neutralised — Once per session, identify and remove a hidden threat before it activates. No roll if you observed area for 1 round."] },
+    "Logistics Coordinator": { bonus: "+2 to Logistics, Supply & Resource Flow", levels: ["Stockpile Sense — Accurately estimate quantity and quality of any supply cache without counting.","Priority Shipment — Once per session, guarantee delivery of a requested item to the party.","Efficient Distribution — Party resource consumption reduced by 1 unit per combat encounter.","Surplus Allocation — At session start, the party begins with one extra consumable from your forward planning.","Supply Web — Establish a resupply point in any location once per session. Draw from it once before exhausted.","Total Logistics — Once per session, source any non-unique item or material given 10 minutes and a comm device."] },
+    "Trader": { bonus: "+2 to Trade Negotiation & Market Appraisal", levels: ["Sharp Eye — Instantly know if an item is overpriced, underpriced, or counterfeit. +1 to all appraisal rolls.","Haggler — Reduce any purchase price by 10% once per session (DC 10 Cunning).","Market Read — Predict supply shortages or price spikes. Sell items at +15% value once per session.","Black Market Contact — Access restricted or illegal goods in any port.","Trade Caravan — Establish a recurring trade route that generates passive income or resources between sessions.","Economic Control — Once per session, corner one commodity in a local market and set the price for that session."] },
+    "Technicon": { bonus: "+2 to Technical Repair & Diagnostics", levels: ["Quick Diagnostic — Identify a malfunction's exact cause in 1 round without tools.","Salvage Repair — Restore 25% function to a broken device using only scrap.","Hot Swap — Replace a failing component mid-operation without shutting the system down.","Overclock — Push any machine beyond limits for 3 rounds (+50% output). Risk damage on a roll of 1–3 on d6.","System Mastery — Full repairs in half the time. Parts cost reduced by 25%.","Machine Whisperer — Once per session, coax function from a device thought completely dead. Operates at 50% for one encounter."] },
+    "Coder": { bonus: "+2 to Hacking, Encryption & Digital Manipulation", levels: ["Probe — Scan any networked system in range to map its structure without alerting anyone.","Exploit — Gain access to one locked digital system with a DC 13 Genius check in 1 round.","Ghost Protocol — Move through a network without traces. Subsequent access to the same system needs no roll this session.","AI Override — Seize temporary control of one autonomous system (turret, door, drone) for 3 rounds.","Virus Inject — Plant a delayed logic bomb that disables a target system for up to 10 minutes on your command.","Total Compromise — Once per session, take full control of one networked system until reset by equal or higher skill."] },
+    "Security Specialist": { bonus: "+2 to Protection, Surveillance & Threat Response", levels: ["Threat Scan — Assess all exits, cover positions, and concealed individuals in a room within 1 round of entry.","Overwatch — Spend your Action to watch a zone. Any enemy entering triggers a free attack before they act.","Intercept — Once per combat, move to an ally's location as a reaction when they are attacked; take half damage for them.","Non-Lethal Takedown — Incapacitate a target without killing on a DC 12 Strength check. They wake in 10 minutes.","Perimeter Lock — Spend 5 minutes setting a perimeter. Any intrusion detected immediately vibrates your comms silently.","Protector Protocol — Once per session, all attacks targeting one designated party member are redirected to you for one full round."] },
+    "Soldier": { bonus: "+2 to Combat & Tactical Engagement", levels: ["Combat Drilled — Reload any weapon as a free action once per combat.","Suppressive Fire — Force one target to take cover for 1 round. They cannot attack.","Breach & Clear — When entering a structure, gain +2 to attack and +1 to defense for the first round.","Iron Will — Once per session, ignore the Wounded penalty for one full combat encounter.","Weapon Specialist — Choose one weapon type. All attacks gain +2 and ignore 2 points of armor.","One-Man Army — Once per session, take two full turns back-to-back. Exhausted until next rest."] },
+    "Pilot": { bonus: "+2 to Piloting, Maneuvering & Evasive Flight", levels: ["Steady Hand — Negate turbulence or instability when piloting. Passengers take no penalties from rough flight.","Evasive Burn — Once per chase, execute a burn maneuver granting +3 to evasion for 2 rounds.","Precision Landing — Land any vessel in any space without a roll unless conditions are extreme.","Attack Vector — Calculate an optimal attack approach. Ship weapons gain +2 to hit for one pass.","Void Drift — Kill engines and drift silently through any obstacle or patrol undetected once per session.","Ace Pilot — Once per session, perform an impossible maneuver. The GM must try to make it work."] },
+    "Mechanic": { bonus: "+2 to Mechanical Repair & Heavy Equipment", levels: ["Engine Read — Diagnose any vehicle fault by sound and vibration alone. No tools or roll required.","Field Strip — Disassemble and reassemble a weapon or engine component in half the normal time.","Boost — Temporarily increase a vehicle's speed by 30% for 3 rounds. Risk overheating on a roll of 1 on d6.","Combat Repair — As a 2-Action turn, restore 20% function to a damaged vehicle mid-combat.","Heavy Modification — Given 1 hour, permanently modify a vehicle to gain one upgrade (GM approval).","Grease Lightning — Once per session, perform a full vehicle repair in one round that would take 30 minutes normally."] },
+    "Miner": { bonus: "+2 to Extraction, Drilling & Hazard Endurance", levels: ["Ore Sense — Detect valuable mineral deposits within 10m with a DC 10 Genius check.","Tunnel Vision — Never disoriented underground or in zero-visibility. Navigate tunnels without a roll.","Controlled Blast — Set a shaped charge to create an opening or collapse a passage with precision.","Hazard Suit Mastery — Operate in toxic, pressurised, or extreme-temp environments for twice the normal safe duration.","Deep Extraction — Double the yield of any resource extraction. Extraction time halved.","Seismic Charge — Once per session, trigger a controlled seismic event creating a terrain obstacle, collapse, or new route."] },
+    "Fabricator": { bonus: "+2 to Fabrication, Assembly & Material Processing", levels: ["Material Eye — Identify the composition, quality, and potential of any raw material on sight.","Rapid Print — Fabricate any simple tool or component in half the base time.","Custom Fit — Any gear you fabricate or modify grants +1 to the user's relevant roll.","Emergency Fabrication — In combat, spend 2 Actions to produce one single-use tool or weapon component.","Nano-Assembly — Fabricate microscale components without specialised equipment.","Master Forge — Once per session, produce a unique high-quality item providing a lasting mechanical advantage."] },
+    "Communications Operator": { bonus: "+2 to Signal Management & Encryption", levels: ["Clear Channel — Maintain clean comms in jamming or interference conditions (DC 10 Genius).","Signal Trace — Track the origin of any transmission within range in 1 round.","Jam Field — Block all enemy communications in a 20m radius for 3 rounds. Requires your Action each round.","Broadcast Override — Hijack an enemy comm channel and feed false orders for up to 2 rounds.","Long Range Link — Stable communication channel across any distance, uninterceptable for 10 minutes once per session.","Total Blackout — Once per session, cut all electronic communications in a large area for 5 minutes."] },
+    "Quartermaster": { bonus: "+2 to Inventory Management & Equipment Allocation", levels: ["Loaded Out — Party starts each session with one extra basic consumable per member.","Field Requisition — Locate and retrieve a needed item from a nearby supply cache (DC 11 Genius) once per session.","Weight Optimised — Party carries 20% more than normal encumbrance limit without penalty.","Controlled Distribution — Ammo and supply consumption reduced by 1 use per combat encounter.","Reserve Cache — Once per session, reveal a pre-placed hidden supply cache at any previously visited location.","Arsenal — Once per session, equip the entire party with an upgrade of your choice."] },
+    "Field Medic": { bonus: "+2 to Emergency Treatment & Field Surgery", levels: ["Pressure Stop — Stop any bleed or wound from worsening as a free action once per combat.","Combat Patch — Restore 8 HP to a target as a 1-Action heal in combat. Once per combat.","Adrenaline Push — Inject an ally to grant them +1 AP for one round. Recipient is Fatigued afterward.","Trauma Response — Stabilise a 0 HP ally in 1 Action. They wake at 5 HP at start of next turn.","Improvised Surgery — Remove one persistent condition or poison with available materials in 10 minutes.","Battlefield Angel — Once per session, triage all downed allies simultaneously as a 2-Action ability. Each stabilises at 5 HP."] },
+    "Surveyor": { bonus: "+2 to Scanning, Mapping & Environmental Assessment", levels: ["Terrain Read — Gain full spatial awareness of terrain within 50m after 1 round of observation.","Hazard Flag — Identify environmental dangers before they affect the party.","Vantage Point — Locate optimal elevated position in any combat zone. Allies using it gain +1 to ranged attacks.","Pathfinder — Navigate any terrain at full speed without penalty. Guide one other party member with you.","Complete Survey — After 10 minutes in an area, produce a full tactical map. +1 to all party actions in that zone.","Living Map — Your surveyed zones are stored permanently. Any change in a mapped area is known automatically on revisit."] },
+    "Starship Gunner": { bonus: "+2 to Targeting, Firing Solutions & Weapon Calibration", levels: ["Targeting Lock — Spend 1 Action to lock on. Your next ship weapon attack gains +3 to hit.","Rapid Fire — Fire twice with a ship weapon at -2 per shot. Once per combat.","Weapon Calibration — Recalibrate a ship weapon in 1 minute. Its next 3 shots ignore 10% of target armor.","Disabling Shot — Target a specific system. On a hit, that system is disabled for 2 rounds.","Overcharge Burst — Once per combat, fire at 150% power for maximum damage. Weapon needs 2 rounds to cool.","Dead Eye — Once per session, any ship weapon attack hits automatically and deals critical damage."] },
+    "Drone Operator": { bonus: "+2 to Drone Control & Remote Piloting", levels: ["Scout Deploy — Deploy a recon drone that maps a 30m radius and reports threats as a free action.","Multi-Link — Control up to 2 drones simultaneously without penalty.","Drone Shield — One drone intercepts one incoming ranged attack per combat as a reaction. The drone is destroyed.","Combat Drone — A combat drone makes one independent attack per round (d20+Genius, 1d6 damage).","Swarm Protocol — Deploy 3 micro-drones. Target rolls all attacks at -1 for 3 rounds.","Drone Army — Once per session, unleash a full swarm. All enemies in 10m must pass Agility DC 14 or be suppressed 2 rounds."] },
+    "Salvage Diver": { bonus: "+2 to Salvage, EVA Maneuvers & Hazard Navigation", levels: ["Vacuum Instinct — Navigate zero-gravity environments at full speed with no penalty or roll.","Scrap Value — Identify the most valuable components in any wreck in 1 round. Always extract maximum yield.","Breach Entry — Force entry into any derelict vessel or sealed structure in 2 rounds without structural risk.","Tether Master — Use tether lines as movement tools. Move an additional hex free and grapple one target.","Deep Dive — Operate in extreme hazard (radiation, pressure, vacuum) at full capacity for up to 2 hours.","Ghost Ship Expert — Once per session, navigate a completely unknown derelict without getting lost or triggering hazards."] },
+    "Terraforming Technician": { bonus: "+2 to Terraforming & Colony Stabilization", levels: ["Atmospheric Read — Assess breathability, toxicity, and hazards of any planetary atmosphere instantly.","Soil Analysis — Determine fertility and contamination of terrain in 1 round.","Emergency Seal — Patch a habitat breach or atmosphere leak in 1 round. No vacuum exposure for the party.","Environment Shift — Alter one environmental condition in a 20m radius over 10 minutes with portable equipment.","Terraforming Ace — Accelerate a terraforming process by 50%. Colony stabilization events never produce negative side-effects.","World Shaper — Once per session, create a localised environmental event in a 50m radius lasting 10 minutes."] },
+    "Freight Hauler": { bonus: "+2 to Cargo Handling & Heavy Transport", levels: ["Pack Mule — Carry twice the normal encumbrance limit without speed reduction.","Cargo Intuition — Know immediately if a cargo container is tampered with, incorrectly loaded, or hiding contraband.","Brute Throw — Improvised weapons deal +2 damage. Throwing range doubled.","Route Memory — Never stopped at routine customs checkpoints on any route you have run before.","Heavy Lift — Move or reposition any object up to 500kg as a 1-Action ability.","Freight Force — Once per session, ram a vehicle or structure for significant damage. Party disembarks safely regardless of impact."] },
+    "Rogue": { bonus: "+1 to Cunning-based Stealth Actions", levels: ["Shadow Step — Move up to 2 hexes without triggering Overwatch or opportunity reactions.","Pickpocket — Lift one item from a target without them noticing (DC 12 Cunning).","Ambush Strike — When attacking from stealth, deal +1d6 bonus damage on the first hit.","Vanish — Once per combat, re-enter stealth as a free action even in plain sight.","Ghost — Leave no trace of passage. Tracking checks against you have disadvantage.","Perfect Kill — Once per session, a stealth attack deals maximum damage automatically and leaves no evidence."] },
+    "Gang Enforcer": { bonus: "+1 to Strength or Vigor Combat Actions", levels: ["Menacing Presence — NPCs with lower Strength must pass a DC 10 Vigor check before confronting you directly.","Street Brawler — Improvised weapons deal +1 damage. You are never considered unarmed.","Shakedown — Intimidate an NPC into giving up information, money, or access. On a failed Aura check they alert others.","Backup — Call in 1d3 street-level allies once per session for one encounter.","Turf Claim — Declare one zone as your turf. You cannot be ambushed there and receive advance warning of faction movements.","Underboss — Once per session, broker a violent resolution that ends a conflict immediately."] },
+    "Drifter": { bonus: "+1 to Vigor-based Survival Actions", levels: ["Road Worn — Hunger, thirst, and fatigue effects are halved. Rest quality unaffected by rough conditions.","Scrounger — Find 1d4 useful items in any abandoned location (DC 10 Cunning).","Blend In — Pass as a local in any settlement (DC 11 Cunning). Authorities don't flag you as a stranger.","Wanderer's Luck — Once per session, re-roll any one die result.","Every Road Leads Home — Navigate back to any previously visited location without getting lost.","Horizon Walker — Once per session, arrive at a destination early by revealing a shortcut or hidden path."] },
+    "Scavenger": { bonus: "+1 to Cunning-based Scavenging Actions", levels: ["Junk Eye — Instantly assess the value and usability of any discarded or broken item.","Parts Strip — Dismantle a broken device in 1 round and extract useful components — no roll required.","Patch Job — Restore one item to 50% function using scavenged parts. One use per item.","Hidden Stash — Once per session, produce a useful item from a previously unnoticed hiding spot in the environment.","Wasteland Smith — Craft a functional weapon or tool entirely from scrap in 10 minutes. Lasts one session.","Nothing Wasted — Once per session, convert wreckage into enough materials to fully resupply the party's basic consumables."] },
+    "Smuggler": { bonus: "+1 to Cunning-based Evasion Actions", levels: ["Hidden Compartment — Any vehicle you operate has one concealed space that passes all routine inspections.","Customs Ghost — Pass standard border or checkpoint security without a search (DC 12 Cunning).","Drop Point — Establish a pre-arranged drop location in any port. Goods can be left or retrieved without direct contact.","Fixer Network — Access the black market in any location.","Running Dark — Once per session, make the party's ship or vehicle undetectable on sensors for up to 10 minutes.","Clean Getaway — Once per session, extract the entire party from a compromised situation with no pursuit or trail."] },
+    "Street Medic": { bonus: "+1 to Genius-based Field Treatment Actions", levels: ["Scrap Stitch — Stop a bleed and restore 5 HP using any available material. No medkit required.","Street Chemistry — Brew a painkiller, stimulant, or antitoxin from local materials (DC 11 Genius). One dose per attempt.","Keep Moving — Remove the movement penalty from a Wounded ally for one encounter.","Gutter Surgeon — Emergency surgery anywhere in 5 minutes: restores 15 HP and removes one condition.","Triage Triage — Treat two injured party members simultaneously as a single 2-Action ability.","Back from the Edge — Once per session, bring a character back from 0 HP using only skill — no supplies needed."] }
+  };
+
+  const profSelect  = document.getElementById('profession-select');
+  const casteSelect = document.getElementById('caste-select');
+  const profEmpty   = document.getElementById('prof-ability-empty');
+  const profName    = document.getElementById('prof-ability-name');
+  const profList    = document.getElementById('prof-ability-list');
+
+  // Filter profession options by selected caste
+  function filterProfessions(caste) {
+    var opts = profSelect.querySelectorAll('option[data-caste]');
+    opts.forEach(function(opt) {
+      opt.hidden = caste ? opt.dataset.caste !== caste : false;
+    });
+    // If current selection is now hidden, reset profession
+    var selected = profSelect.querySelector('option:checked');
+    if (selected && selected.hidden) {
+      profSelect.value = '';
+      profSelect.dispatchEvent(new Event('change'));
+    }
+  }
+
+  casteSelect.addEventListener('change', function() {
+    filterProfessions(this.value);
+  });
+
+  profSelect.addEventListener('change', function() {
+    var val  = this.value;
+    var data = PROF_ABILITIES[val];
+
+    // Auto-set caste from selected profession
+    var selectedOpt = this.querySelector('option[value="' + val + '"], option:checked');
+    if (selectedOpt && selectedOpt.dataset.caste) {
+      if (casteSelect.value !== selectedOpt.dataset.caste) {
+        casteSelect.value = selectedOpt.dataset.caste;
+        filterProfessions(selectedOpt.dataset.caste);
+      }
+    }
+
+    if (!data) {
+      profEmpty.style.display = '';
+      profName.style.display  = 'none';
+      profList.innerHTML = '';
+      return;
+    }
+    profEmpty.style.display = 'none';
+    profName.style.display  = '';
+    profName.textContent = val + '  ·  ' + data.bonus;
+    profList.innerHTML = data.levels.map(function(txt, i) {
+      const dash = txt.indexOf(' — ');
+      const name = dash !== -1 ? txt.slice(0, dash) : 'Lvl ' + (i+1);
+      const desc = dash !== -1 ? txt.slice(dash + 3) : txt;
+      return '<div class="prof-level-row">'
+        + '<span class="prof-level-badge">LVL ' + (i+1) + '</span>'
+        + '<span><span class="prof-level-ability-name">' + name + '</span> — ' + desc + '</span>'
+        + '</div>';
+    }).join('');
+  });
+
+  // Sync select values to print inputs before printing
+  function syncSelectsForPrint() {
+    var casteSelect = document.getElementById('caste-select');
+    var castePrint  = document.getElementById('caste-print');
+    if (casteSelect && castePrint) {
+      castePrint.value = casteSelect.value || '';
+    }
+    var profSelect = document.getElementById('profession-select');
+    var profPrint  = document.getElementById('profession-print');
+    if (profSelect && profPrint) {
+      profPrint.value = profSelect.value || '';
+    }
+  }
+  window.addEventListener('beforeprint', syncSelectsForPrint);
+
+  // AP pips enabled = floor(AGI / 5)
+  var agiInput = document.getElementById('stat-agi');
+  var apPips   = document.querySelectorAll('#ap-pips .ap-pip');
+  function updateAPPips() {
+    var agi = parseInt(agiInput.value, 10);
+    var enabled = isNaN(agi) ? 0 : Math.floor(agi / 5);
+    if (enabled > apPips.length) enabled = apPips.length;
+    apPips.forEach(function(pip, i) {
+      pip.disabled = i >= enabled;
+      if (i >= enabled) pip.checked = false;
+    });
+  }
+  agiInput.addEventListener('input', updateAPPips);
+  updateAPPips();
+</script>
+</body>
+</html>

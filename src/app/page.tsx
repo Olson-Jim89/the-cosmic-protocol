@@ -1,66 +1,37 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from "next/link";
+import HeroCarousel from "@/components/HeroCarousel";
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <>
+      <HeroCarousel />
+
+      <section className="home-grid-rows">
+        {/* Row 1: info then picture */}
+        <article className="card home-col info-panel">
+          <h2>What Is &quot;The Cosmic Protocol&quot;?</h2>
+          <p style={{ marginTop: "10px" }}>
+            The Cosmic Protocol is a sci-fi tabletop RPG of faction intrigue, starship crews,
+            and decisions that echo across the galaxy. Choose your race, your profession, and
+            your allegiance. Then find out what you&rsquo;re made of.
           </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+          <p style={{ marginTop: "10px" }}>The Cosmic Protocol features:</p>
+          <ul style={{ marginTop: "6px", paddingLeft: "18px", display: "flex", flexDirection: "column", gap: "6px" }}>
+            <li>Roll <strong>d20 + exploding d6</strong> for all attacks, saves, and skill checks</li>
+            <li>Choose your <strong>race</strong> and <strong>profession</strong> to shape your role in the crew</li>
+            <li>Contest combat style before every fight — <strong>narrative</strong> or <strong>tactical</strong> mode</li>
+            <li>3 Action Points (AP) per turn in tactical combat for granular, strategic play</li>
+            <li>Faction reputation, alliance choices, and long-term consequences carry session to session</li>
+          </ul>
+          <Link href="/rulebook" className="button ghost" style={{ marginTop: "14px" }}>
+            Read The Rulebook
+          </Link>
+          <Link href="/character-sheet" className="button ghost" style={{ marginTop: "8px" }}>
+            Character Sheet
+          </Link>
+        </article>
+
+      </section>
+    </>
   );
 }
