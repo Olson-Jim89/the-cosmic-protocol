@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Orbitron, Oxanium } from "next/font/google";
 import StarfieldController from "@/components/StarfieldController";
 import SiteMain from "@/components/SiteMain";
+import AuthProvider from "@/components/AuthProvider";
+import NavAuth from "@/components/NavAuth";
 import "./globals.css";
 
 const orbitron = Orbitron({
@@ -28,11 +30,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const isLoggedIn = false;
-
   return (
     <html lang="en" className={`${orbitron.variable} ${oxanium.variable}`}>
       <body>
+        <AuthProvider>
         <StarfieldController />
         <div className="site-shell">
           <header className="topbar">
@@ -51,9 +52,7 @@ export default function RootLayout({
                 <Link href="/store">Store</Link>
               </div>
               <div className="topnav-auth">
-                <Link href={isLoggedIn ? "/play" : "/accounts"}>
-                  Play Online
-                </Link>
+                <NavAuth />
               </div>
               <Link href="/about" className="topnav-about">About Us</Link>
             </nav>
@@ -94,6 +93,7 @@ export default function RootLayout({
             </div>
           </footer>
         </div>
+        </AuthProvider>
       </body>
     </html>
   );
