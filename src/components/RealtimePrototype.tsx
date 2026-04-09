@@ -37,6 +37,7 @@ export default function RealtimePrototype() {
   const [dmLog, setDmLog] = useState(INITIAL_DM);
   const [dmInput, setDmInput] = useState("");
   const [dropStatus, setDropStatus] = useState("No item deployed yet.");
+  const [realtimeStatus, setRealtimeStatus] = useState("connecting…");
 
   const threadEntries = useMemo(() => dmLog[activeThread], [activeThread, dmLog]);
 
@@ -53,7 +54,7 @@ export default function RealtimePrototype() {
 
     // Subscribe to new messages in real-time
     const channel = supabase
-      .channel("lobby_messages")
+      .channel("realtime:public:lobby_messages")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "lobby_messages" },
@@ -62,7 +63,9 @@ export default function RealtimePrototype() {
           setChatLog((prev) => [...prev, { id: msg.id, sender: msg.sender, body: msg.body }]);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        setRealtimeStatus(status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -152,7 +155,7 @@ export default function RealtimePrototype() {
         </article>
 
         <article className="card">
-          <h2>Game Chat</h2>
+          <h2>Game Chat <span style={{ fontSize: "0.7rem", opacity: 0.6 }}>({realtimeStatus})</span></h2>
           <div className="action-row" style={{ marginBottom: 8 }}>
             <label style={{ fontSize: "0.85rem", whiteSpace: "nowrap" }}>Your name:</label>
             <input
