@@ -1,8 +1,15 @@
 "use client";
 
-import { KeyboardEvent, useMemo, useState } from "react";
+import { useEffect, KeyboardEvent, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 type ThreadKey = "commander" | "engineer" | "broker";
+
+type ChatEntry = {
+  id?: number;
+  sender: string;
+  body: string;
+};
 
 type DMEntry = {
   sender: string;
@@ -24,10 +31,8 @@ const INITIAL_DM: Record<ThreadKey, DMEntry[]> = {
 
 export default function RealtimePrototype() {
   const [chatInput, setChatInput] = useState("");
-  const [chatLog, setChatLog] = useState<DMEntry[]>([
-    { sender: "GM // Helios", body: "Mission clock starts now. Push loadouts to the table." },
-    { sender: "Player // Aria", body: "Uploading station blueprint and breach route image." },
-  ]);
+  const [playerName, setPlayerName] = useState("Player");
+  const [chatLog, setChatLog] = useState<ChatEntry[]>([]);
   const [activeThread, setActiveThread] = useState<ThreadKey>("commander");
   const [dmLog, setDmLog] = useState(INITIAL_DM);
   const [dmInput, setDmInput] = useState("");
@@ -35,13 +40,42 @@ export default function RealtimePrototype() {
 
   const threadEntries = useMemo(() => dmLog[activeThread], [activeThread, dmLog]);
 
-  function sendChat() {
+  useEffect(() => {
+    // Load existing messages
+    supabase
+      .from("lobby_messages")
+      .select("id, sender, body")
+      .order("created_at", { ascending: true })
+      .limit(100)
+      .then(({ data }) => {
+        if (data) setChatLog(data);
+      });
+
+    // Subscribe to new messages in real-time
+    const channel = supabase
+      .channel("lobby_messages")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "lobby_messages" },
+        (payload) => {
+          const msg = payload.new as ChatEntry;
+          setChatLog((prev) => [...prev, { id: msg.id, sender: msg.sender, body: msg.body }]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  async function sendChat() {
     const value = chatInput.trim();
     if (!value) {
       return;
     }
-    setChatLog((prev) => [...prev, { sender: "You", body: value }]);
     setChatInput("");
+    await supabase.from("lobby_messages").insert({ sender: playerName, body: value });
   }
 
   function sendDM() {
@@ -119,9 +153,18 @@ export default function RealtimePrototype() {
 
         <article className="card">
           <h2>Game Chat</h2>
+          <div className="action-row" style={{ marginBottom: 8 }}>
+            <label style={{ fontSize: "0.85rem", whiteSpace: "nowrap" }}>Your name:</label>
+            <input
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              placeholder="Enter your name"
+              style={{ maxWidth: 160 }}
+            />
+          </div>
           <div className="log">
             {chatLog.map((entry, idx) => (
-              <div className="message" key={`${entry.sender}-${idx}`}>
+              <div className="message" key={entry.id ?? idx}>
                 <strong>{entry.sender}</strong>
                 {entry.body}
               </div>
