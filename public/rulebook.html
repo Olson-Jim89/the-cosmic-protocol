@@ -884,14 +884,94 @@
   /* ── RESPONSIVE ── */
   @media (max-width: 768px) {
     :root { --sidebar-width: 0px; }
-    #sidebar { display: none; }
-    #main { margin-left: 0; }
-    .chapter { padding: 2rem 1.2rem; }
-    #page-hero { padding: 3rem 1.5rem 2.5rem; }
+
+    #sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.28s ease;
+      width: 280px;
+      min-width: 280px;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+    }
+
+    #sidebar.open {
+      transform: translateX(0);
+    }
+
+    /* Overlay behind open sidebar */
+    #sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 90;
+    }
+    #sidebar-overlay.show { display: block; }
+
+    /* Hamburger button */
+    #menu-toggle {
+      display: flex;
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 200;
+      background: var(--ink);
+      border: 1px solid var(--gold-dim);
+      border-radius: 6px;
+      width: 40px;
+      height: 40px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-direction: column;
+      gap: 5px;
+      padding: 8px;
+    }
+
+    #menu-toggle span {
+      display: block;
+      width: 100%;
+      height: 2px;
+      background: var(--gold);
+      border-radius: 2px;
+      transition: all 0.2s ease;
+    }
+
+    #menu-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    #menu-toggle.open span:nth-child(2) { opacity: 0; }
+    #menu-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    #main {
+      margin-left: 0;
+      padding-top: 56px; /* space for the fixed hamburger button */
+    }
+
+    .chapter { padding: 2rem 1rem; }
+    #page-hero { padding: 3rem 1.2rem 2rem; }
     .race-card { grid-template-columns: 1fr; }
+    .race-bonus-block { text-align: left; }
     .profession-list { grid-template-columns: 1fr; }
-    .weapon-table { font-size: 12px; }
     .enemy-roster-grid { grid-template-columns: 1fr; }
+
+    /* Table overflow scroll */
+    .weapon-section,
+    .stat-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .weapon-table,
+    .stat-table {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      min-width: unset;
+      width: 100%;
+      font-size: 12px;
+    }
+
+    h2.chapter-title { font-size: 1.5rem; }
+
+    .grenade-grid { grid-template-columns: 1fr; }
   }
 
   /* ── ENEMY CARDS ── */
@@ -4722,8 +4802,45 @@
       e.preventDefault();
       const target = document.querySelector(link.getAttribute('href'));
       if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Close sidebar on mobile after navigation
+      sidebar.classList.remove('open');
+      toggle.classList.remove('open');
+      overlay.classList.remove('show');
     });
   });
+</script>
+
+<!-- Mobile hamburger toggle -->
+<button id="menu-toggle" aria-label="Toggle table of contents" style="display:none">
+  <span></span><span></span><span></span>
+</button>
+<div id="sidebar-overlay"></div>
+
+<script>
+  const toggle = document.getElementById('menu-toggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+
+  function isMobile() { return window.innerWidth <= 768; }
+
+  function syncToggleVisibility() {
+    toggle.style.display = isMobile() ? 'flex' : 'none';
+  }
+
+  toggle.addEventListener('click', () => {
+    const open = sidebar.classList.toggle('open');
+    toggle.classList.toggle('open', open);
+    overlay.classList.toggle('show', open);
+  });
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    toggle.classList.remove('open');
+    overlay.classList.remove('show');
+  });
+
+  syncToggleVisibility();
+  window.addEventListener('resize', syncToggleVisibility);
 </script>
 </body>
 </html>
