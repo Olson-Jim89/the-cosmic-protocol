@@ -889,6 +889,16 @@
   @media (max-width: 768px) {
     :root { --sidebar-width: 0px; }
 
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    body {
+      display: block; /* kill the sidebar flex layout */
+    }
+
     #sidebar {
       transform: translateX(-100%);
       transition: transform 0.28s ease;
@@ -946,15 +956,34 @@
 
     #main {
       margin-left: 0;
-      padding-top: 56px; /* space for the fixed hamburger button */
+      padding-top: 56px;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
     }
 
-    .chapter { padding: 2rem 1rem; }
-    #page-hero { padding: 3rem 1.2rem 2rem; }
+    .chapter {
+      padding: 2rem 1rem;
+      overflow-x: hidden;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    #page-hero {
+      padding: 2.5rem 1rem 2rem;
+    }
+
+    #page-hero h1 {
+      font-size: clamp(1.6rem, 7vw, 2.4rem);
+    }
+
+    h2.chapter-title { font-size: 1.4rem; }
+
     .race-card { grid-template-columns: 1fr; }
     .race-bonus-block { text-align: left; }
     .profession-list { grid-template-columns: 1fr; }
     .enemy-roster-grid { grid-template-columns: 1fr; }
+    .grenade-grid { grid-template-columns: 1fr; }
 
     /* Tables scroll inside a JS-injected wrapper — see script below */
     .table-scroll-wrap {
@@ -962,6 +991,7 @@
       -webkit-overflow-scrolling: touch;
       margin: 0.6rem 0;
       border-radius: 4px;
+      max-width: 100%;
     }
 
     .weapon-table,
@@ -969,32 +999,27 @@
       font-size: 12px;
     }
 
-    /* Prevent any stray element from stretching the page */
-    .chapter {
-      overflow-x: hidden;
-    }
-
-    /* Make the hero padding safe on tiny screens */
-    #page-hero {
-      padding: 2.5rem 1rem 2rem;
-    }
-    #page-hero h1 {
-      font-size: clamp(1.6rem, 7vw, 2.4rem);
-    }
-
-    /* Caste rule text wraps */
-    .caste-rule {
-      word-break: break-word;
-    }
-
-    /* Prevent nowrap badges from stretching cards */
-    .race-bonus, .enemy-category, .dmg-badge, .faction-tag, .ability-tag {
+    /* Prevent nowrap badges from stretching the page */
+    .race-bonus, .enemy-category, .dmg-badge, .faction-tag, .ability-tag,
+    .weapon-category, .psionic-category {
       white-space: normal;
     }
 
-    h2.chapter-title { font-size: 1.4rem; }
+    /* Long letter-spacing can push text off screen */
+    .toc-section-label,
+    #page-hero .subtitle,
+    .enemy-faction-label,
+    .chapter-num {
+      letter-spacing: 0.08em;
+    }
 
-    .grenade-grid { grid-template-columns: 1fr; }
+    /* Caste / rule text wraps */
+    .caste-rule, .rule-block, .lore-box {
+      word-break: break-word;
+    }
+
+    /* Step list badges stay compact */
+    .step-list li { flex-wrap: wrap; }
   }
 
   /* ── ENEMY CARDS ── */
