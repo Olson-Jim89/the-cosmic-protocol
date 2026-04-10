@@ -28,6 +28,10 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  html { overflow-x: hidden; }
+
+  img { max-width: 100%; height: auto; }
+
   body {
     background: var(--void-dark);
     color: var(--ink);
@@ -952,24 +956,43 @@
     .profession-list { grid-template-columns: 1fr; }
     .enemy-roster-grid { grid-template-columns: 1fr; }
 
-    /* Table overflow scroll */
-    .weapon-section,
-    .stat-table-wrap {
+    /* Tables scroll inside a JS-injected wrapper — see script below */
+    .table-scroll-wrap {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
+      margin: 0.6rem 0;
+      border-radius: 4px;
     }
 
     .weapon-table,
     .stat-table {
-      display: block;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      min-width: unset;
-      width: 100%;
       font-size: 12px;
     }
 
-    h2.chapter-title { font-size: 1.5rem; }
+    /* Prevent any stray element from stretching the page */
+    .chapter {
+      overflow-x: hidden;
+    }
+
+    /* Make the hero padding safe on tiny screens */
+    #page-hero {
+      padding: 2.5rem 1rem 2rem;
+    }
+    #page-hero h1 {
+      font-size: clamp(1.6rem, 7vw, 2.4rem);
+    }
+
+    /* Caste rule text wraps */
+    .caste-rule {
+      word-break: break-word;
+    }
+
+    /* Prevent nowrap badges from stretching cards */
+    .race-bonus, .enemy-category, .dmg-badge, .faction-tag, .ability-tag {
+      white-space: normal;
+    }
+
+    h2.chapter-title { font-size: 1.4rem; }
 
     .grenade-grid { grid-template-columns: 1fr; }
   }
@@ -4841,6 +4864,21 @@
 
   syncToggleVisibility();
   window.addEventListener('resize', syncToggleVisibility);
+</script>
+
+<!-- Wrap all tables in a scroll container on mobile -->
+<script>
+  function wrapTables() {
+    document.querySelectorAll('table').forEach(function(table) {
+      if (table.parentNode && !table.parentNode.classList.contains('table-scroll-wrap')) {
+        var wrapper = document.createElement('div');
+        wrapper.className = 'table-scroll-wrap';
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+      }
+    });
+  }
+  wrapTables();
 </script>
 </body>
 </html>
