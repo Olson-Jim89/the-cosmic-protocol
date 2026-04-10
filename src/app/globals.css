@@ -860,18 +860,191 @@ textarea {
   }
 }
 
+/* ─────────────────────────────────────────────────────
+   Mobile — 720 px and below
+───────────────────────────────────────────────────── */
 @media (max-width: 720px) {
+  /* Shell */
   .site-shell {
     width: 100%;
     margin: 0;
     border-radius: 0;
   }
 
+  /* Main content */
   .topbar,
   .site-main,
   .site-footer {
     padding-left: 14px;
     padding-right: 14px;
+  }
+
+  .site-main {
+    padding-top: 18px;
+    gap: 14px;
+  }
+
+  /* ── Topbar ── */
+  .topbar {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 14px;
+    align-items: flex-start;
+  }
+
+  .brand small {
+    display: none;          /* hide tagline to save space */
+  }
+
+  .topnav {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .topnav-links {
+    flex-wrap: wrap;
+    gap: 0;
+    padding: 4px 0;
+  }
+
+  .topnav-links a {
+    font-size: 0.62rem;
+    padding: 4px 4px;
+  }
+
+  /* De-skew the auth panel — looks bad at narrow widths */
+  .topnav-auth {
+    transform: none;
+    border-left: none;
+    border-top: 3px solid #888;
+    margin-bottom: 0;
+    padding: 8px 10px;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* Re-skew the inner links back to normal */
+  .topnav-auth > * {
+    transform: none !important;
+  }
+
+  .topnav-about {
+    border-left: none;
+    border-top: 1px solid #dce4f2;
+    padding: 6px 0;
+    margin-left: 0;
+    font-size: 0.62rem;
+  }
+
+  /* ── Typography ── */
+  h1 {
+    font-size: clamp(1.4rem, 7vw, 2rem);
+  }
+
+  h2 {
+    font-size: 1rem;
+  }
+
+  /* ── Cards ── */
+  .card,
+  .char-card {
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .page-intro {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  /* ── Hero carousel ── */
+  .hero-carousel {
+    margin: -18px -14px 0;
+  }
+
+  .hero-carousel-stage {
+    height: 220px;
+  }
+
+  .hero-carousel-content {
+    bottom: 44px;
+    left: 14px;
+    right: 56px;
+  }
+
+  .hero-carousel-caption {
+    font-size: 1rem;
+  }
+
+  .hero-carousel-controls {
+    left: 14px;
+    bottom: 10px;
+  }
+
+  /* ── Lobby / Play page ── */
+  /* header row with button */
+  .page-split-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* ── Stat grid – squeeze to 5 in a row on mobile ── */
+  .char-stats {
+    gap: 5px;
+  }
+
+  .stat-pip .val {
+    font-size: 1rem;
+  }
+
+  /* ── Character ability score input grid ── */
+  .stat-input-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* ── Battlefield grid outer wrapper ── */
+  .battlefield-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── GM breadcrumb / back link ── */
+  .gm-back {
+    font-size: 0.68rem;
+  }
+
+  /* ── Button rows ── */
+  .button-row {
+    flex-wrap: wrap;
+  }
+
+  .button {
+    font-size: 0.65rem;
+    min-height: 38px;
+    padding: 0 12px;
+  }
+
+  /* ── Tile palette — wrap ── */
+  .tile-palette {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* ── Footer ── */
+  .site-footer {
+    padding-top: 18px;
+    padding-bottom: 18px;
+    gap: 18px;
+  }
+
+  /* ── Rulebook iframe ── */
+  iframe {
+    height: calc(100dvh - 54px);
   }
 }
 
@@ -911,6 +1084,17 @@ textarea {
     border-color: #000000;
     background: #ffffff;
   }
+}
+
+/* ─────────────────────────────────────────────────────
+   Layout helpers
+───────────────────────────────────────────────────── */
+.page-split-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 /* ─────────────────────────────────────────────────────

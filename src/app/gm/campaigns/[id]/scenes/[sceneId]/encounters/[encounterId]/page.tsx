@@ -187,7 +187,7 @@ export default function EncounterPage({
 
       {/* ── ENEMIES ─────────────────────────────────────── */}
       <section style={{ marginBottom: 32 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <div className="page-split-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <h2 style={{ margin: 0 }}>Enemies</h2>
           <button className="button primary" onClick={() => setShowEnemyForm((v) => !v)}>
             {showEnemyForm ? "Cancel" : "+ Add Enemy"}
@@ -327,6 +327,7 @@ export default function EncounterPage({
           </div>
 
           {/* Grid */}
+          <div className="battlefield-scroll" style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
           <div
             style={{
               display: "grid",
@@ -336,7 +337,8 @@ export default function EncounterPage({
               border: "1px solid var(--line)",
               borderRadius: 10,
               padding: 8,
-              overflowX: "auto",
+              width: "max-content",
+              minWidth: "100%",
             }}
           >
             {Array.from({ length: GRID_ROWS }).map((_, y) =>
@@ -371,6 +373,7 @@ export default function EncounterPage({
                 );
               })
             )}
+          </div>
           </div>
 
           {/* Legend */}

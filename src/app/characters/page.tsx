@@ -270,7 +270,7 @@ export default function CharactersPage() {
               <p style={{ fontSize: "0.78rem", color: "var(--muted)", marginBottom: 10, fontFamily: "var(--font-orbitron)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                 Ability Scores (1–10)
               </p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
+              <div className="stat-input-grid" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
                 <StatInput name="strength" label="Strength" />
                 <StatInput name="vigor" label="Vigor" />
                 <StatInput name="genius" label="Genius" />

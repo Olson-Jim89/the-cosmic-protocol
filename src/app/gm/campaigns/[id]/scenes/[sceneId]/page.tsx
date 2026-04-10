@@ -160,7 +160,7 @@ export default function ScenePage({
 
       {/* ── ENCOUNTERS ──────────────────────────────────── */}
       <section>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <div className="page-split-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <h2 style={{ margin: 0 }}>Encounters</h2>
           <button className="button primary" onClick={() => setShowEncForm((v) => !v)}>
             {showEncForm ? "Cancel" : "+ Add Encounter"}
@@ -225,7 +225,7 @@ export default function ScenePage({
 
       {/* ── NPCs ─────────────────────────────────────────── */}
       <section>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <div className="page-split-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <h2 style={{ margin: 0 }}>NPCs</h2>
           <button className="button secondary" onClick={() => setShowNpcForm((v) => !v)}>
             {showNpcForm ? "Cancel" : "+ Add NPC"}

@@ -105,7 +105,7 @@ export default function CampaignPage({ params }: { params: Promise<{ id: string 
         </div>
       )}
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+      <div className="page-split-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <h2 style={{ margin: 0 }}>Scenes</h2>
         <button className="button primary" onClick={() => setShowSceneForm((v) => !v)}>
           {showSceneForm ? "Cancel" : "+ Add Scene"}

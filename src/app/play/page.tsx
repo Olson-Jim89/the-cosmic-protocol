@@ -155,7 +155,7 @@ export default function PlayPage() {
 
       {/* Open games */}
       <section>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <div className="page-split-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <h2 style={{ margin: 0 }}>Open Tables</h2>
           <button
             className="button primary"

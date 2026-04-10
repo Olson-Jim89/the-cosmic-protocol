@@ -94,7 +94,7 @@ export default function GmPage() {
         </div>
       )}
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+      <div className="page-split-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <h2 style={{ margin: 0 }}>Your Campaigns</h2>
         <button className="button primary" onClick={() => setShowForm((v) => !v)}>
           {showForm ? "Cancel" : "+ New Campaign"}
