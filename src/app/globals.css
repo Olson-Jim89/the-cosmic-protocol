@@ -914,16 +914,18 @@ textarea {
     padding: 4px 4px;
   }
 
-  /* De-skew the auth panel — looks bad at narrow widths */
+  /* Collapse the auth panel — strip all decoration, just show the button(s) */
   .topnav-auth {
     transform: none;
-    border-left: none;
-    border-top: 3px solid #888;
-    margin-bottom: 0;
-    padding: 8px 10px;
-    width: 100%;
+    background: none;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+    width: auto;
+    align-self: auto;
     justify-content: flex-start;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
   }
 
