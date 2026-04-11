@@ -2,7 +2,7 @@ export default function AboutPage() {
   return (
     <>
       <section className="page-intro">
-        <h1>About Us</h1>
+        <h1>About CPI</h1>
         <p className="lede">
           Cosmic Protocol is a sci-fi tabletop RPG project focused on campaign storytelling,
           tactical play, and realtime online crew sessions.

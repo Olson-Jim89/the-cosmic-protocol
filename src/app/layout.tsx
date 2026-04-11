@@ -48,13 +48,12 @@ export default function RootLayout({
               <div className="topnav-links">
                 <Link href="/">Home</Link>
                 <Link href="/rulebook">Rulebook</Link>
-                <Link href="/character-sheet">Character Sheet</Link>
+                <Link href="/about">About CPI</Link>
                 <Link href="/store">Store</Link>
               </div>
               <div className="topnav-auth">
                 <NavAuth />
               </div>
-              <Link href="/about" className="topnav-about">About Us</Link>
             </nav>
           </header>
 
@@ -80,8 +79,8 @@ export default function RootLayout({
               <ul>
                 <li><Link href="/">Home</Link></li>
                 <li><Link href="/rulebook">Rulebook</Link></li>
+                <li><Link href="/about">About CPI</Link></li>
                 <li><Link href="/store">Store</Link></li>
-                <li><Link href="/about">About Us</Link></li>
               </ul>
             </div>
             <div>
