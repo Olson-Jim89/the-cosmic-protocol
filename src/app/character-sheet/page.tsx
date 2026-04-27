@@ -1,7 +1,16 @@
-export default function CharacterSheetPage() {
+"use client";
+
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+
+function SheetFrame() {
+  const params = useSearchParams();
+  const id = params.get("id");
+  const src = id ? `/character-sheet.html?id=${encodeURIComponent(id)}` : "/character-sheet.html";
+
   return (
     <iframe
-      src="/character-sheet.html"
+      src={src}
       title="Cosmic Protocol — Galactic Passport"
       style={{
         display: "block",
@@ -10,5 +19,13 @@ export default function CharacterSheetPage() {
         border: "none",
       }}
     />
+  );
+}
+
+export default function CharacterSheetPage() {
+  return (
+    <Suspense>
+      <SheetFrame />
+    </Suspense>
   );
 }

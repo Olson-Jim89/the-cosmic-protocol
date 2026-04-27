@@ -17,6 +17,10 @@ export default function PlayPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [joinTargetGameId, setJoinTargetGameId] = useState<string | null>(null);
+  const [selectedCharId, setSelectedCharId] = useState<string>("");
+  const [joining, setJoining] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/accounts");
@@ -32,16 +36,17 @@ export default function PlayPage() {
   async function fetchGames() {
     const { data } = await supabase
       .from("games")
-      .select("*, gm:profiles!gm_id(callsign)")
+      .select("*, game_players(user_id)")
       .eq("status", "open")
       .order("created_at", { ascending: false });
     if (data) {
       setGames(
         data.map((g: unknown) => {
-          const game = g as Game & { gm: { callsign?: string } | null };
+          const game = g as Game & { game_players: { user_id: string }[] };
           return {
             ...game,
-            gm_callsign: game.gm?.callsign ?? "Unknown",
+            gm_callsign: "GM",
+            player_count: game.game_players?.length ?? 0,
           };
         })
       );
@@ -67,14 +72,37 @@ export default function PlayPage() {
     setMyGameIds(new Set((data ?? []).map((r: { game_id: string }) => r.game_id)));
   }
 
-  async function joinGame(gameId: string) {
-    if (!user) return;
+  function openJoinModal(gameId: string) {
+    setJoinTargetGameId(gameId);
+    setSelectedCharId(characters[0]?.id ?? "");
     setJoinError(null);
-    const { error } = await supabase
-      .from("game_players")
-      .insert({ game_id: gameId, user_id: user.id });
-    if (error) setJoinError(error.message);
-    else setMyGameIds((prev) => new Set([...prev, gameId]));
+  }
+
+  async function confirmJoin() {
+    if (!user || !joinTargetGameId) return;
+    setJoining(true);
+    setJoinError(null);
+    const { error } = await supabase.from("game_players").insert({
+      game_id: joinTargetGameId,
+      user_id: user.id,
+      callsign: profile?.callsign ?? "Unknown",
+      character_id: selectedCharId || null,
+    });
+    if (error) {
+      setJoinError(error.message);
+      setJoining(false);
+    } else {
+      setJoinTargetGameId(null);
+      router.push(`/play/${joinTargetGameId}`);
+    }
+  }
+
+  async function deleteGame(gameId: string) {
+    if (!user) return;
+    await supabase.from("games").delete().eq("id", gameId).eq("gm_id", user.id);
+    setConfirmDeleteId(null);
+    setGames((prev) => prev.filter((g) => g.id !== gameId));
+    setMyGameIds((prev) => { const s = new Set(prev); s.delete(gameId); return s; });
   }
 
   async function createGame(e: FormEvent<HTMLFormElement>) {
@@ -82,16 +110,16 @@ export default function PlayPage() {
     if (!user) return;
     setCreating(true);
     const fd = new FormData(e.currentTarget);
-    const { error } = await supabase.from("games").insert({
+    const { data: newGame, error } = await supabase.from("games").insert({
       name: String(fd.get("name")),
       gm_id: user.id,
       max_players: Number(fd.get("max_players") ?? 4),
       notes: String(fd.get("notes") ?? "") || null,
-    });
-    if (!error) {
-      setShowCreate(false);
-      (e.target as HTMLFormElement).reset();
-      await fetchGames();
+    }).select().single();
+    if (!error && newGame) {
+      // Auto-join GM as a player so RLS allows them to chat
+      await supabase.from("game_players").insert({ game_id: newGame.id, user_id: user.id, callsign: profile?.callsign ?? "Unknown" });
+      router.push(`/play/${newGame.id}`);
     }
     setCreating(false);
   }
@@ -212,7 +240,7 @@ export default function PlayPage() {
                       <p style={{ fontSize: "0.82rem", marginTop: 6 }}>{game.notes}</p>
                     )}
                   </div>
-                  <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: "auto" }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: "auto", flexWrap: "wrap" }}>
                     <span
                       style={{
                         fontSize: "0.7rem",
@@ -222,16 +250,53 @@ export default function PlayPage() {
                         letterSpacing: "0.07em",
                       }}
                     >
-                      Max {game.max_players}
+                      {game.player_count ?? 0}/{game.max_players} players
                     </span>
-                    <button
-                      className={`button ${joined ? "ghost" : "secondary"}`}
-                      onClick={() => !joined && joinGame(game.id)}
-                      disabled={joined}
-                      style={{ marginLeft: "auto", minHeight: 34, padding: "0 14px" }}
-                    >
-                      {joined ? "✓ Joined" : "Join"}
-                    </button>
+                    {joined ? (
+                      <div style={{ display: "flex", gap: 8, marginLeft: "auto" }}>
+                        <button
+                          className="button primary"
+                          onClick={() => router.push(`/play/${game.id}`)}
+                          style={{ minHeight: 34, padding: "0 16px", fontSize: "0.72rem" }}
+                        >
+                          ✓ Enter Lobby
+                        </button>
+                        {game.gm_id === user.id && (
+                          confirmDeleteId === game.id ? (
+                            <>
+                              <button
+                                onClick={() => deleteGame(game.id)}
+                                style={{ minHeight: 34, padding: "0 12px", fontSize: "0.72rem", background: "rgba(255,60,60,0.2)", border: "1px solid rgba(255,80,80,0.4)", color: "#ff9999", borderRadius: 10, cursor: "pointer" }}
+                              >
+                                Confirm
+                              </button>
+                              <button
+                                onClick={() => setConfirmDeleteId(null)}
+                                style={{ minHeight: 34, padding: "0 12px", fontSize: "0.72rem", background: "transparent", border: "1px solid var(--line)", color: "var(--muted)", borderRadius: 10, cursor: "pointer" }}
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmDeleteId(game.id)}
+                              style={{ minHeight: 34, padding: "0 12px", fontSize: "0.72rem", background: "rgba(255,60,60,0.1)", border: "1px solid rgba(255,80,80,0.3)", color: "#ff9999", borderRadius: 10, cursor: "pointer" }}
+                            >
+                              Delete
+                            </button>
+                          )
+                        )}
+                      </div>
+                    ) : (
+                      <button
+                        className="button secondary"
+                        onClick={() => openJoinModal(game.id)}
+                        disabled={(game.player_count ?? 0) >= game.max_players}
+                        style={{ marginLeft: "auto", minHeight: 34, padding: "0 16px" }}
+                      >
+                        {(game.player_count ?? 0) >= game.max_players ? "Full" : "Join"}
+                      </button>
+                    )}
                   </div>
                 </article>
               );
@@ -239,6 +304,59 @@ export default function PlayPage() {
           </div>
         )}
       </section>
+      {/* Join modal */}
+      {joinTargetGameId && (
+        <div
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}
+          onClick={() => !joining && setJoinTargetGameId(null)}
+        >
+          <article className="card" style={{ maxWidth: 420, width: "90%" }} onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ marginBottom: 6 }}>Join Table</h2>
+            <p style={{ color: "var(--muted)", fontSize: "0.86rem", marginBottom: 20 }}>
+              Select the character you want to bring to this session.
+            </p>
+
+            {characters.length === 0 ? (
+              <div style={{ background: "rgba(255,200,0,0.08)", border: "1px solid rgba(255,200,0,0.25)", borderRadius: 10, padding: "12px 14px", marginBottom: 20 }}>
+                <p style={{ color: "var(--yellow)", fontSize: "0.84rem", margin: 0 }}>
+                  You have no characters yet.{" "}
+                  <a href="/characters" style={{ color: "var(--blue)", textDecoration: "underline" }}>Create one</a>
+                  {" "}or join without one.
+                </p>
+              </div>
+            ) : (
+              <label style={{ marginBottom: 20 }}>
+                Character
+                <select
+                  value={selectedCharId}
+                  onChange={(e) => setSelectedCharId(e.target.value)}
+                  style={{ marginTop: 6 }}
+                >
+                  <option value="">— No character (spectator) —</option>
+                  {characters.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name} — {c.race} {c.caste}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+
+            {joinError && (
+              <p style={{ color: "#ff9999", fontSize: "0.82rem", marginBottom: 14 }}>⚠ {joinError}</p>
+            )}
+
+            <div className="button-row">
+              <button className="button primary" onClick={confirmJoin} disabled={joining}>
+                {joining ? "Joining…" : "Join Session"}
+              </button>
+              <button className="button ghost" onClick={() => setJoinTargetGameId(null)} disabled={joining}>
+                Cancel
+              </button>
+            </div>
+          </article>
+        </div>
+      )}
     </>
   );
 }

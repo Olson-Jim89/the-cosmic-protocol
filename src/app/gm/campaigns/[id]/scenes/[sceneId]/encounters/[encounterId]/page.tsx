@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState, useRef, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabase";
-import type { Encounter, Enemy, TerrainTile, TileType } from "@/lib/types";
+import type { Encounter, Enemy, TerrainTile, TileType, BattleMapData } from "@/lib/types";
+import { ENEMY_ROSTER, ENEMY_NAMES, CATEGORY_TO_TYPE } from "@/lib/enemies";
+import BattleMap from "@/components/BattleMap";
 
 const GRID_COLS = 12;
 const GRID_ROWS = 8;
@@ -42,11 +44,22 @@ export default function EncounterPage({
   const [dataLoading, setDataLoading] = useState(true);
 
   const [showEnemyForm, setShowEnemyForm] = useState(false);
+  const [enemyType, setEnemyType] = useState("standard");
+  const [statValues, setStatValues] = useState({ hp: 50, sta: 40, arm: 1, mov: 25, strength: 10, agility: 10, vigor: 10, genius: 10, cunning: 10, aura: 10 });
   const [saving, setSaving] = useState(false);
   const [savingGrid, setSavingGrid] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [gridSaved, setGridSaved] = useState(false);
   const [activeTile, setActiveTile] = useState<TileType>("cover");
+
+  // Battle map state
+  const [mapData, setMapData] = useState<BattleMapData>({});
+  const [floorUrl, setFloorUrl] = useState<string | null>(null);
+  const [wallUrl, setWallUrl] = useState<string | null>(null);
+  const [mapUploading, setMapUploading] = useState<"floor" | "wall" | null>(null);
+  const [mapSaving, setMapSaving] = useState(false);
+  const [mapSaved, setMapSaved] = useState(false);
+  const mapDataRef = useRef<BattleMapData>({});
 
   useEffect(() => {
     params.then((p) => setIds(p));
@@ -66,7 +79,14 @@ export default function EncounterPage({
   async function fetchEncounter() {
     if (!ids) return;
     const { data } = await supabase.from("encounters").select("*").eq("id", ids.encounterId).single();
-    setEncounter(data ?? null);
+    if (data) {
+      setEncounter(data);
+      setFloorUrl(data.battle_bg_floor ?? null);
+      setWallUrl(data.battle_bg_wall ?? null);
+      const md: BattleMapData = data.map_data ?? {};
+      setMapData(md);
+      mapDataRef.current = md;
+    }
   }
 
   async function fetchEnemies() {
@@ -124,6 +144,20 @@ export default function EncounterPage({
     setGridSaved(false);
   }
 
+  function handleEnemyNameChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const match = ENEMY_ROSTER.find((en) => en.name === e.target.value);
+    if (match) {
+      setEnemyType(CATEGORY_TO_TYPE[match.category]);
+      setStatValues({ hp: match.hp, sta: match.sta, arm: match.arm, mov: match.mov, strength: match.strength, agility: match.agility, vigor: match.vigor, genius: match.genius, cunning: match.cunning, aura: match.aura });
+    }
+  }
+
+  function resetEnemyForm() {
+    setShowEnemyForm(false);
+    setEnemyType("standard");
+    setStatValues({ hp: 50, sta: 40, arm: 1, mov: 25, strength: 10, agility: 10, vigor: 10, genius: 10, cunning: 10, aura: 10 });
+  }
+
   async function addEnemy(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!ids) return;
@@ -133,18 +167,23 @@ export default function EncounterPage({
     const { error: err } = await supabase.from("enemies").insert({
       encounter_id: ids.encounterId,
       name: String(fd.get("name")),
-      enemy_type: String(fd.get("enemy_type") ?? "standard") || null,
+      enemy_type: enemyType || null,
       count: Number(fd.get("count") ?? 1),
-      strength: Number(fd.get("strength") ?? 1),
-      vigor: Number(fd.get("vigor") ?? 1),
-      genius: Number(fd.get("genius") ?? 1),
-      cunning: Number(fd.get("cunning") ?? 1),
-      aura: Number(fd.get("aura") ?? 1),
+      hp: statValues.hp,
+      sta: statValues.sta,
+      arm: statValues.arm,
+      mov: statValues.mov,
+      strength: statValues.strength,
+      agility: statValues.agility,
+      vigor: statValues.vigor,
+      genius: statValues.genius,
+      cunning: statValues.cunning,
+      aura: statValues.aura,
       notes: String(fd.get("notes") ?? "") || null,
     });
     if (err) setError(err.message);
     else {
-      setShowEnemyForm(false);
+      resetEnemyForm();
       (e.target as HTMLFormElement).reset();
       await fetchEnemies();
     }
@@ -154,6 +193,56 @@ export default function EncounterPage({
   async function deleteEnemy(id: string) {
     await supabase.from("enemies").delete().eq("id", id);
     setEnemies((prev) => prev.filter((en) => en.id !== id));
+  }
+
+  async function adjustHp(en: Enemy, delta: number) {
+    const current = en.current_hp ?? en.hp;
+    const next = Math.max(0, Math.min(en.hp, current + delta));
+    setEnemies((prev) => prev.map((e) => e.id === en.id ? { ...e, current_hp: next } : e));
+    await supabase.from("enemies").update({ current_hp: next }).eq("id", en.id);
+  }
+
+  async function adjustSta(en: Enemy, delta: number) {
+    const current = en.current_sta ?? en.sta;
+    const next = Math.max(0, Math.min(en.sta, current + delta));
+    setEnemies((prev) => prev.map((e) => e.id === en.id ? { ...e, current_sta: next } : e));
+    await supabase.from("enemies").update({ current_sta: next }).eq("id", en.id);
+  }
+
+  async function resetHp(en: Enemy) {
+    setEnemies((prev) => prev.map((e) => e.id === en.id ? { ...e, current_hp: en.hp, current_sta: en.sta } : e));
+    await supabase.from("enemies").update({ current_hp: en.hp, current_sta: en.sta }).eq("id", en.id);
+  }
+
+  // ── Battle map helpers ──────────────────────────────────
+  async function uploadMapImage(file: File, layer: "floor" | "wall") {
+    if (!ids) return;
+    setMapUploading(layer);
+    setError(null);
+    const path = `${ids.encounterId}/${layer}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+    const { error: upErr } = await supabase.storage.from("battle-maps").upload(path, file, { upsert: true });
+    if (upErr) { setError(upErr.message); setMapUploading(null); return; }
+    const { data: urlData } = supabase.storage.from("battle-maps").getPublicUrl(path);
+    const col = layer === "floor" ? "battle_bg_floor" : "battle_bg_wall";
+    await supabase.from("encounters").update({ [col]: urlData.publicUrl }).eq("id", ids.encounterId);
+    if (layer === "floor") setFloorUrl(urlData.publicUrl);
+    else setWallUrl(urlData.publicUrl);
+    setMapUploading(null);
+  }
+
+  function handleMapChange(data: BattleMapData) {
+    setMapData(data);
+    mapDataRef.current = data;
+    setMapSaved(false);
+  }
+
+  async function saveMapData() {
+    if (!ids) return;
+    setMapSaving(true);
+    await supabase.from("encounters").update({ map_data: mapDataRef.current }).eq("id", ids.encounterId);
+    setMapSaving(false);
+    setMapSaved(true);
+    setTimeout(() => setMapSaved(false), 2000);
   }
 
   if (loading || !user) return null;
@@ -201,11 +290,21 @@ export default function EncounterPage({
               <div className="grid grid-2">
                 <label>
                   Name
-                  <input name="name" type="text" placeholder="Void Raider" required />
+                  <input
+                    name="name"
+                    type="text"
+                    list="enemy-catalog"
+                    placeholder="Type or pick from roster…"
+                    onChange={handleEnemyNameChange}
+                    required
+                  />
+                  <datalist id="enemy-catalog">
+                    {ENEMY_NAMES.map((n) => <option key={n} value={n} />)}
+                  </datalist>
                 </label>
                 <label>
                   Type
-                  <select name="enemy_type">
+                  <select value={enemyType} onChange={(e) => setEnemyType(e.target.value)}>
                     {ENEMY_TYPES.map((t) => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
                   </select>
                 </label>
@@ -215,12 +314,21 @@ export default function EncounterPage({
                 <input name="count" type="number" min={1} max={50} defaultValue={1} required />
               </label>
               <div>
-                <p style={{ fontSize: "0.72rem", color: "var(--muted)", marginBottom: 8, fontFamily: "var(--font-orbitron)", textTransform: "uppercase", letterSpacing: "0.07em" }}>Stats</p>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8 }}>
-                  {[["strength","STR"],["vigor","VIG"],["genius","GEN"],["cunning","CUN"],["aura","AUR"]].map(([n,l]) => (
+                <p style={{ fontSize: "0.72rem", color: "var(--muted)", marginBottom: 8, fontFamily: "var(--font-orbitron)", textTransform: "uppercase", letterSpacing: "0.07em" }}>Vitals — auto-filled from roster</p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 8 }}>
+                  {(["hp","sta","arm","mov"] as const).map((n) => (
                     <label key={n} style={{ textAlign: "center" }}>
-                      <span style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.07em", display: "block", marginBottom: 4 }}>{l}</span>
-                      <input name={n} type="number" min={1} max={20} defaultValue={1} required style={{ textAlign: "center", padding: "6px 4px" }} />
+                      <span style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.07em", display: "block", marginBottom: 4 }}>{n.toUpperCase()}{n === "mov" ? " (ft)" : ""}</span>
+                      <input type="number" min={0} max={n === "mov" ? 100 : 999} value={statValues[n]} onChange={(e) => setStatValues((prev) => ({ ...prev, [n]: Number(e.target.value) }))} required style={{ textAlign: "center", padding: "6px 4px" }} />
+                    </label>
+                  ))}
+                </div>
+                <p style={{ fontSize: "0.72rem", color: "var(--muted)", marginBottom: 8, fontFamily: "var(--font-orbitron)", textTransform: "uppercase", letterSpacing: "0.07em" }}>Attributes</p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 8 }}>
+                  {(["strength","agility","vigor","genius","cunning","aura"] as const).map((n) => (
+                    <label key={n} style={{ textAlign: "center" }}>
+                      <span style={{ fontSize: "0.65rem", textTransform: "uppercase", letterSpacing: "0.07em", display: "block", marginBottom: 4 }}>{n === "strength" ? "STR" : n === "agility" ? "AGI" : n === "vigor" ? "VIG" : n === "genius" ? "GEN" : n === "cunning" ? "CUN" : "AUR"}</span>
+                      <input type="number" min={1} max={30} value={statValues[n]} onChange={(e) => setStatValues((prev) => ({ ...prev, [n]: Number(e.target.value) }))} required style={{ textAlign: "center", padding: "6px 4px" }} />
                     </label>
                   ))}
                 </div>
@@ -231,7 +339,7 @@ export default function EncounterPage({
               </label>
               <div className="button-row">
                 <button type="submit" className="button primary" disabled={saving}>{saving ? "Saving…" : "Add Enemy"}</button>
-                <button type="button" className="button ghost" onClick={() => setShowEnemyForm(false)}>Cancel</button>
+                <button type="button" className="button ghost" onClick={resetEnemyForm}>Cancel</button>
               </div>
             </form>
           </article>
@@ -259,10 +367,47 @@ export default function EncounterPage({
                   </div>
                   <button onClick={() => deleteEnemy(en.id)} style={{ background: "none", border: "none", color: "#ff9999", cursor: "pointer", fontSize: "0.9rem", padding: "2px 6px" }}>✕</button>
                 </div>
+                {/* Live HP / STA trackers */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 8 }}>
+                  {([
+                    { label: "HP",  cur: en.current_hp ?? en.hp,  max: en.hp,  color: "var(--red)",  onMinus: () => adjustHp(en, -1),  onPlus: () => adjustHp(en, 1),  onBig: () => adjustHp(en, -10) },
+                    { label: "STA", cur: en.current_sta ?? en.sta, max: en.sta, color: "var(--blue)", onMinus: () => adjustSta(en, -1), onPlus: () => adjustSta(en, 1), onBig: () => adjustSta(en, -10) },
+                  ]).map(({ label, cur, max, color, onMinus, onPlus, onBig }) => (
+                    <div key={label}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+                        <span style={{ fontSize: "0.65rem", fontFamily: "var(--font-orbitron)", textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--muted)" }}>{label}</span>
+                        <span style={{ fontSize: "0.82rem", fontWeight: 700, color }}>{cur} / {max}</span>
+                      </div>
+                      {/* Bar */}
+                      <div style={{ height: 6, borderRadius: 4, background: "rgba(255,255,255,0.08)", overflow: "hidden", marginBottom: 6 }}>
+                        <div style={{ height: "100%", borderRadius: 4, background: color, width: `${max > 0 ? Math.round((cur / max) * 100) : 0}%`, transition: "width 0.2s" }} />
+                      </div>
+                      {/* Steppers */}
+                      <div style={{ display: "flex", gap: 4 }}>
+                        <button onClick={onBig} title={`-10 ${label}`} style={{ flex: 1, background: "rgba(255,60,60,0.15)", border: "1px solid rgba(255,80,80,0.3)", color: "#ff9999", borderRadius: 6, cursor: "pointer", fontSize: "0.7rem", padding: "3px 0", fontFamily: "var(--font-orbitron)" }}>−10</button>
+                        <button onClick={onMinus} title={`-1 ${label}`} style={{ flex: 1, background: "rgba(255,60,60,0.1)", border: "1px solid rgba(255,80,80,0.2)", color: "#ff9999", borderRadius: 6, cursor: "pointer", fontSize: "0.8rem", padding: "3px 0" }}>−</button>
+                        <button onClick={onPlus} title={`+1 ${label}`} style={{ flex: 1, background: "rgba(89,221,157,0.1)", border: "1px solid rgba(89,221,157,0.25)", color: "var(--green)", borderRadius: 6, cursor: "pointer", fontSize: "0.8rem", padding: "3px 0" }}>+</button>
+                      </div>
+                    </div>
+                  ))}
+                  <button onClick={() => resetHp(en)} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--line)", color: "var(--muted)", borderRadius: 6, cursor: "pointer", fontSize: "0.62rem", fontFamily: "var(--font-orbitron)", textTransform: "uppercase", letterSpacing: "0.06em", padding: "4px 0" }}>
+                    Reset to Full
+                  </button>
+                </div>
+                {/* ARM / MOV static */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }}>
+                  {([["ARM", en.arm, "var(--text)"], ["MOV", en.mov ? `${en.mov}ft` : "—", "var(--green)"]] as [string, string|number, string][]).map(([l, v, c]) => (
+                    <div key={l} style={{ textAlign: "center", background: "rgba(255,255,255,0.04)", borderRadius: 6, padding: "5px 4px" }}>
+                      <div style={{ fontSize: "0.82rem", fontWeight: 700, color: c }}>{v ?? 0}</div>
+                      <div style={{ fontSize: "0.6rem", color: "var(--muted)", fontFamily: "var(--font-orbitron)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 2 }}>{l}</div>
+                    </div>
+                  ))}
+                </div>
+                {/* Attributes */}
                 <div className="char-stats">
-                  {[["STR",en.strength],["VIG",en.vigor],["GEN",en.genius],["CUN",en.cunning],["AUR",en.aura]].map(([l,v]) => (
+                  {([["STR",en.strength],["AGI",en.agility],["VIG",en.vigor],["GEN",en.genius],["CUN",en.cunning],["AUR",en.aura]] as [string, number][]).map(([l,v]) => (
                     <div key={l} className="stat-pip">
-                      <div className="val">{v}</div>
+                      <div className="val">{v ?? 10}</div>
                       <div className="lbl">{l}</div>
                     </div>
                   ))}
@@ -385,6 +530,71 @@ export default function EncounterPage({
               </span>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── BATTLE MAP ──────────────────────────────────── */}
+      <section style={{ marginTop: 32 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <h2 style={{ margin: 0 }}>Battle Map</h2>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              className="button secondary"
+              style={{ minHeight: 34, padding: "0 14px", fontSize: "0.68rem" }}
+              onClick={saveMapData}
+              disabled={mapSaving}
+            >
+              {mapSaving ? "Saving…" : mapSaved ? "✓ Saved!" : "Save Map"}
+            </button>
+          </div>
+        </div>
+
+        {/* Layer upload row */}
+        <div className="card" style={{ marginBottom: 14 }}>
+          <p style={{ fontSize: "0.72rem", color: "var(--muted)", marginBottom: 12, fontFamily: "var(--font-orbitron)", textTransform: "uppercase", letterSpacing: "0.07em" }}>
+            Background Layers
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            {(["floor", "wall"] as const).map((layer) => {
+              const url = layer === "floor" ? floorUrl : wallUrl;
+              return (
+                <div key={layer} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: "0.68rem", fontFamily: "var(--font-orbitron)", textTransform: "uppercase", letterSpacing: "0.07em", color: layer === "floor" ? "var(--yellow)" : "var(--blue)" }}>
+                      {layer === "floor" ? "Floor Layer" : "Wall Layer"}
+                    </span>
+                    <label style={{ cursor: "pointer", display: "inline-flex", alignItems: "center", minHeight: 28, padding: "0 10px", fontSize: "0.6rem", fontFamily: "var(--font-orbitron)", textTransform: "uppercase", letterSpacing: "0.08em", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(220,231,248,0.24)", color: "#f2f6ff", borderRadius: 8 }}>
+                      {mapUploading === layer ? "Uploading…" : url ? "Change" : "Upload"}
+                      <input type="file" accept="image/*" style={{ display: "none" }} disabled={mapUploading !== null} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadMapImage(f, layer); }} />
+                    </label>
+                  </div>
+                  {url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={url} alt={`${layer} preview`} style={{ width: "100%", height: 80, objectFit: "cover", borderRadius: 8, border: "1px solid var(--line)" }} />
+                  ) : (
+                    <div style={{ height: 80, borderRadius: 8, border: "1px dashed rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <span style={{ fontSize: "0.72rem", color: "var(--muted)" }}>No image yet</span>
+                    </div>
+                  )}
+                  <p style={{ fontSize: "0.66rem", color: "var(--muted)", margin: 0 }}>
+                    {layer === "floor"
+                      ? "Shown beneath walls. Revealed in room polygons."
+                      : "Painted on top of floor. Rooms cut through this layer."}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Canvas editor */}
+        <div className="card">
+          <BattleMap
+            floorUrl={floorUrl}
+            wallUrl={wallUrl}
+            mapData={mapData}
+            onChange={handleMapChange}
+          />
         </div>
       </section>
     </>

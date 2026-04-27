@@ -65,20 +65,6 @@ export default function GmPage() {
 
   if (loading || !user) return null;
 
-  if (profile && profile.role !== "gm" && profile.role !== "admin") {
-    return (
-      <>
-        <section className="page-intro">
-          <h1>GM Tools</h1>
-          <p className="lede">This area is for Game Masters only.</p>
-        </section>
-        <div className="card">
-          <p>Your account role is <strong>{profile.role}</strong>. To access GM Tools, register a new account and select <strong>Game Master</strong> as your role.</p>
-        </div>
-      </>
-    );
-  }
-
   return (
     <>
       <section className="page-intro">

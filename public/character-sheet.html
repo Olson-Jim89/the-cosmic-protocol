@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cosmic Protocol — Galactic Passport</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
 
@@ -45,12 +46,17 @@
     background-image:
       radial-gradient(ellipse at 20% 20%, rgba(0,60,80,0.18) 0%, transparent 60%),
       radial-gradient(ellipse at 80% 80%, rgba(40,20,60,0.15) 0%, transparent 60%);
+    display: block;
+    min-height: 100vh;
+    padding: 0;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .sheet-layout-wrapper {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    min-height: 100vh;
     padding: 40px 20px;
-    font-family: 'Share Tech Mono', monospace;
   }
 
   .passport {
@@ -434,6 +440,60 @@
     text-shadow: var(--glow-cyan);
   }
 
+  /* Hide native number spinners — replaced by custom JS buttons */
+  .ability-box input[type=number]::-webkit-inner-spin-button,
+  .ability-box input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; appearance: none; }
+  .ability-box input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+  /* Custom stepper wrapper */
+  .ability-stepper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+  .ability-stepper input {
+    flex: 1;
+    min-width: 0;
+  }
+  .ability-stepper-col {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-left: 1px solid var(--metal-shine);
+  }
+  .ability-stepper-btn {
+    flex: 1;
+    width: 14px;
+    background: linear-gradient(180deg, #1e2230 0%, #13141a 100%);
+    border: none;
+    color: var(--metal-shine);
+    font-size: 8px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s, background 0.15s;
+    user-select: none;
+  }
+  .ability-stepper-btn:hover:not(:disabled) {
+    background: rgba(0,229,255,0.12);
+    color: var(--accent-cyan);
+  }
+  .ability-stepper-btn:disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
+  .ability-stepper-btn + .ability-stepper-btn {
+    border-top: 1px solid var(--metal-shine);
+  }
+  .ability-box {
+    width: 58px;
+    overflow: hidden;
+  }
+
   /* ── DERIVED STATS ── */
   .derived-row {
     display: flex;
@@ -540,10 +600,12 @@
   }
 
   .conditions-group {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    grid-template-rows: repeat(2, auto);
     gap: 6px 18px;
     flex: 1;
+    align-content: start;
   }
 
   .condition-cell {
@@ -793,7 +855,7 @@
 
   .attack-row {
     display: grid;
-    grid-template-columns: 100px 1fr 70px 70px 70px;
+    grid-template-columns: 140px 1fr 70px 65px 45px 28px;
     gap: 6px;
     align-items: center;
     margin-bottom: 6px;
@@ -824,6 +886,8 @@
   }
   .attack-input:focus { border-bottom-color: var(--accent-cyan); }
   .attack-input.prefilled { color: var(--wire-gold); }
+  .attack-input[readonly] { color: var(--text-dim); cursor: default; border-bottom-style: dotted; }
+  .attack-input[readonly]:focus { border-bottom-color: rgba(0,229,255,0.2); }
 
   /* ── FEATS ── */
   .feats-plate {
@@ -1258,21 +1322,19 @@
 
   /* ── THEME TOGGLE BUTTON ── */
   .theme-toggle {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    z-index: 9999;
     display: flex;
+    justify-content: center;
     gap: 6px;
+    width: 100%;
     background: rgba(0,0,0,0.55);
-    border: 1px solid rgba(0,229,255,0.3);
-    border-radius: 6px;
-    padding: 5px 8px;
+    border-bottom: 1px solid rgba(0,229,255,0.2);
+    padding: 8px 0;
     font-family: 'Orbitron', sans-serif;
     font-size: 9px;
     letter-spacing: 0.12em;
     cursor: pointer;
     user-select: none;
+    box-sizing: border-box;
   }
   .theme-toggle button {
     background: transparent;
@@ -1297,8 +1359,8 @@
     background-image: none;
   }
   body[data-theme="light"] .theme-toggle {
-    background: rgba(255,255,255,0.8);
-    border-color: rgba(0,80,160,0.25);
+    background: rgba(255,255,255,0.9);
+    border-bottom-color: rgba(0,80,160,0.2);
   }
   body[data-theme="light"] .theme-toggle button {
     color: #4a5568;
@@ -1591,6 +1653,9 @@
     .etch-select { color: #0a2a4a !important; border-bottom-color: rgba(0,60,120,0.2) !important; }
     .ability-box { background: #e8f0f8 !important; border: 1px solid #8aabcc !important; box-shadow: none !important; }
     .ability-box input { color: #0a2a4a !important; text-shadow: none !important; }
+    .ability-stepper-col { border-left-color: #8aabcc !important; }
+    .ability-stepper-btn { background: #dce8f4 !important; color: #4a6a8a !important; border: none !important; }
+    .ability-stepper-btn + .ability-stepper-btn { border-top: 1px solid #8aabcc !important; }
     .ability-label span { color: #2a5a8a !important; text-shadow: none !important; }
     .derived-box { background: #dce8f4 !important; border: 1px solid #8aabcc !important; box-shadow: none !important; }
     .derived-box input { color: #0a2a4a !important; text-shadow: none !important; }
@@ -1666,6 +1731,17 @@
       font-size: 11px !important;
     }
     /* Guide panel — last page in print */
+    .sheet-layout {
+      display: block !important;
+    }
+    .sheet-layout .guide-panel {
+      position: static !important;
+      max-height: none !important;
+      overflow: visible !important;
+      width: 900px !important;
+      max-width: 900px !important;
+      margin: 0 auto !important;
+    }
     .guide-panel {
       page-break-before: always !important;
       break-before: page !important;
@@ -1687,9 +1763,45 @@
     .guide-field { color: #8a5a00 !important; }
     .guide-entry { color: #1a2a3a !important; border-bottom-color: rgba(0,60,120,0.08) !important; }
     .guide-note { color: #3a5070 !important; background: #e8f0f8 !important; border-left-color: #8aabcc !important; }
+    /* Ability creation helpers — hidden / blank on print */
+    #ability-points-bar { display: none !important; }
+    .ability-box input { color: transparent !important; -webkit-text-fill-color: transparent !important; }
+    .ability-stepper-col { display: none !important; }
+    /* Hide number input spinners on print */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { display: none !important; -webkit-appearance: none !important; }
+    input[type=number] { -moz-appearance: textfield !important; appearance: textfield !important; }
   }
 
   /* ── GUIDE PANEL STYLES ── */
+  .sheet-layout {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+  .sheet-layout .passport {
+    flex: 0 0 auto;
+    order: 2;
+  }
+  .sheet-layout .guide-panel {
+    flex: 1 1 320px;
+    min-width: 280px;
+    max-width: 380px;
+    width: 380px !important;
+    margin: 0 !important;
+    order: 1;
+    position: sticky;
+    top: 16px;
+    max-height: calc(100vh - 32px);
+    overflow: hidden auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: var(--metal-shine) transparent;
+    align-self: flex-start;
+  }
   .guide-panel {
     width: 900px;
     max-width: 900px;
@@ -1791,6 +1903,234 @@
   body[data-theme="light"] .guide-entry { color: #1a2a3a; border-bottom-color: rgba(0,0,0,0.05); }
   body[data-theme="light"] .guide-entry p { color: #3a5060; }
   body[data-theme="light"] .guide-note { color: #2a4a6a; background: #e8f0f8; border-left-color: #7aaabb; }
+
+  /* ── CASTE PASSIVE ── */
+  .caste-passive-plate {
+    display: none;
+    padding: 8px 12px;
+    background: rgba(212,175,55,0.06);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 4px;
+    grid-column: 1 / -1;
+  }
+  .caste-passive-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px;
+    letter-spacing: .18em;
+    color: var(--wire-gold);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .caste-passive-desc { font-size: 9px; line-height: 1.5; color: var(--text-bright); font-family: 'Share Tech Mono', monospace; }
+  .caste-passive-rest { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 9px; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; cursor: pointer; }
+  .caste-passive-cb { accent-color: var(--wire-gold); width: 13px; height: 13px; cursor: pointer; }
+
+  /* ── PSIONIC HAPPENINGS ── */
+  .psionic-plate { display: none; }
+  .psionic-row {
+    display: grid;
+    grid-template-columns: 1fr 120px 58px 28px;
+    gap: 4px;
+    align-items: center;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(0,229,255,0.08);
+  }
+  .psionic-row:last-child { border-bottom: none; }
+  .psionic-pips { display: flex; gap: 3px; justify-content: center; }
+  .psionic-pip {
+    width: 12px; height: 12px;
+    appearance: none; -webkit-appearance: none;
+    border: 1px solid rgba(0,229,255,0.4);
+    border-radius: 50%; cursor: pointer; background: transparent;
+    transition: background .15s;
+  }
+  .psionic-pip:checked { background: var(--accent-cyan); border-color: var(--accent-cyan); }
+  body[data-theme="light"] .psionic-pip { border-color: rgba(0,80,160,0.35); }
+  body[data-theme="light"] .psionic-pip:checked { background: #0050a0; border-color: #0050a0; }
+
+  /* ── ATTACK ROW LV COLUMN ── */
+  .attack-lv-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(0,229,255,0.2);
+    color: var(--wire-blue);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    text-align: center;
+    width: 100%;
+    padding: 2px 0;
+  }
+  .attack-lv-input:focus { outline: none; border-bottom-color: var(--accent-cyan); }
+  body[data-theme="light"] .attack-lv-input { color: #005080; border-bottom-color: rgba(0,60,120,0.2); }
+
+  /* ── SHEET PAGE 2 ── */
+  .sheet-page-2 { display: none; }
+  .bg-textarea {
+    width: 100%;
+    min-height: 140px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(0,229,255,0.15);
+    border-radius: 4px;
+    color: var(--text-bright);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    padding: 8px;
+    resize: vertical;
+    box-sizing: border-box;
+    line-height: 1.6;
+  }
+  .bg-textarea:focus { outline: none; border-color: rgba(0,229,255,0.4); }
+  body[data-theme="light"] .bg-textarea { background: rgba(255,255,255,0.7); border-color: rgba(0,60,120,0.2); color: #1a2a3a; }
+  @media print {
+    .sheet-page-2 { display: block !important; page-break-before: always; }
+    .attack-lv-input { color: #003070 !important; border-bottom-color: rgba(0,60,120,0.2) !important; }
+    .psionic-plate { display: block !important; }
+    .caste-passive-plate { display: block !important; }
+    .page-flip-btn { display: none !important; }
+  }
+
+  /* ── PAGE FLIP BUTTON ── */
+  .page-flip-btn {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 32px;
+    background: rgba(10,20,40,0.92);
+    border: 1px solid rgba(0,229,255,0.3);
+    border-right: none;
+    border-radius: 6px 0 0 6px;
+    padding: 18px 7px;
+    cursor: pointer;
+    z-index: 9999;
+    transition: background 0.18s, border-color 0.18s;
+    user-select: none;
+    box-shadow: -2px 0 14px rgba(0,229,255,0.1);
+  }
+  .page-flip-btn:hover { background: rgba(0,229,255,0.13); border-color: rgba(0,229,255,0.65); }
+  .page-flip-btn:hover .flip-arrow,
+  .page-flip-btn:hover .flip-label { color: #fff; }
+  .page-flip-btn .flip-arrow {
+    font-size: 14px;
+    color: var(--accent-cyan);
+    line-height: 1;
+  }
+  .page-flip-btn .flip-label {
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 6.5px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-cyan);
+    white-space: nowrap;
+    margin-top: 4px;
+  }
+  body[data-theme="light"] .page-flip-btn { background: rgba(220,235,255,0.96); border-color: rgba(0,80,180,0.35); }
+  body[data-theme="light"] .page-flip-btn .flip-arrow,
+  body[data-theme="light"] .page-flip-btn .flip-label { color: #004080; }
+  /* left-side variant shown on page 2 */
+  .page-flip-btn.flip-left {
+    right: auto;
+    left: 0;
+    border-right: 1px solid rgba(0,229,255,0.3);
+    border-left: none;
+    border-radius: 0 6px 6px 0;
+    box-shadow: 2px 0 14px rgba(0,229,255,0.1);
+  }
+  body[data-theme="light"] .page-flip-btn.flip-left { border-right-color: rgba(0,80,180,0.35); border-left: none; }
+
+  /* ── DATALINK BAR ── */
+  .datalink-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    padding: 6px 14px;
+    background: rgba(0,8,20,0.97);
+    border-bottom: 1px solid rgba(0,229,255,0.18);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px;
+    letter-spacing: 0.14em;
+    color: var(--accent-cyan);
+    position: relative;
+    z-index: 100;
+  }
+  .datalink-bar .dl-label {
+    font-size: 7px;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    white-space: nowrap;
+  }
+  .datalink-bar .dl-status {
+    font-size: 9px;
+    color: var(--accent-cyan);
+    letter-spacing: 0.12em;
+  }
+  .datalink-bar .dl-status.linked { color: #39ff80; }
+  .datalink-bar .dl-input {
+    background: rgba(0,229,255,0.05);
+    border: 1px solid rgba(0,229,255,0.25);
+    border-radius: 3px;
+    color: var(--text-bright);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    padding: 3px 7px;
+    outline: none;
+    width: 150px;
+  }
+  .datalink-bar .dl-input:focus { border-color: rgba(0,229,255,0.6); }
+  .datalink-bar .dl-select {
+    background: rgba(0,229,255,0.05);
+    border: 1px solid rgba(0,229,255,0.25);
+    border-radius: 3px;
+    color: var(--text-bright);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 7.5px;
+    padding: 3px 6px;
+    outline: none;
+    max-width: 180px;
+  }
+  .datalink-bar .dl-btn {
+    background: transparent;
+    border: 1px solid rgba(0,229,255,0.4);
+    border-radius: 3px;
+    color: var(--accent-cyan);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 7.5px;
+    letter-spacing: 0.12em;
+    padding: 3px 10px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .datalink-bar .dl-btn:hover { background: rgba(0,229,255,0.15); color: #fff; }
+  .datalink-bar .dl-btn:disabled { opacity: 0.35; cursor: default; }
+  .datalink-bar .dl-btn.save { border-color: rgba(57,255,128,0.5); color: #39ff80; }
+  .datalink-bar .dl-btn.save:hover { background: rgba(57,255,128,0.12); }
+  .datalink-bar .dl-btn.danger { border-color: rgba(255,60,60,0.4); color: #ff6060; }
+  .datalink-bar .dl-btn.danger:hover { background: rgba(255,60,60,0.12); }
+  .datalink-bar .dl-msg {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: #39ff80;
+    letter-spacing: 0.08em;
+    margin-left: 4px;
+    transition: opacity 0.4s;
+  }
+  .datalink-bar .dl-msg.err { color: #ff6060; }
+  .datalink-divider { width: 1px; height: 18px; background: rgba(0,229,255,0.2); flex-shrink: 0; }
+  body[data-theme="light"] .datalink-bar { background: rgba(230,240,255,0.98); border-bottom-color: rgba(0,80,180,0.2); }
+  body[data-theme="light"] .datalink-bar .dl-label { color: #60748a; }
+  body[data-theme="light"] .datalink-bar .dl-status { color: #0050c0; }
+  body[data-theme="light"] .datalink-bar .dl-input,
+  body[data-theme="light"] .datalink-bar .dl-select { background: #fff; border-color: rgba(0,80,180,0.3); color: #1a2a4a; }
+  body[data-theme="light"] .datalink-bar .dl-btn { border-color: rgba(0,80,180,0.4); color: #0050c0; }
+  @media print { .datalink-bar { display: none !important; } }
 </style>
 </head>
 <body data-theme="dark">
@@ -1802,6 +2142,34 @@
   <button id="btn-print" onclick="window.print()">&#9113; PRINT</button>
 </div>
 
+<!-- DATALINK BAR: Supabase save/load -->
+<div class="datalink-bar" id="datalink-bar">
+  <span class="dl-label">◈ DATALINK</span>
+  <span class="dl-status" id="dl-status">NOT LINKED</span>
+  <!-- Auth section (shown when not signed in) -->
+  <div id="dl-auth-section" style="display:flex;align-items:center;gap:6px;">
+    <div class="datalink-divider"></div>
+    <input class="dl-input" id="dl-email" type="email" placeholder="EMAIL ADDRESS" autocomplete="email">
+    <input class="dl-input" id="dl-pass" type="password" placeholder="PASSKEY" autocomplete="current-password" style="width:120px">
+    <button class="dl-btn" onclick="dlSignIn()">LINK &#9654;</button>
+  </div>
+  <!-- Actions section (shown when signed in) -->
+  <div id="dl-actions-section" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;">
+    <div class="datalink-divider"></div>
+    <select class="dl-select" id="dl-char-select" onchange="dlOnCharSelect()">
+      <option value="">— NEW CHARACTER —</option>
+    </select>
+    <button class="dl-btn save" onclick="dlSave()">&#11014; SAVE</button>
+    <button class="dl-btn" id="dl-load-btn" onclick="dlLoad()" disabled>&#11015; LOAD</button>
+    <button class="dl-btn danger" id="dl-delete-btn" onclick="dlDelete()" style="display:none">&#10005; DELETE</button>
+    <div class="datalink-divider"></div>
+    <button class="dl-btn" onclick="dlSignOut()">DISCONNECT</button>
+  </div>
+  <span class="dl-msg" id="dl-msg"></span>
+</div>
+
+<div class="sheet-layout-wrapper">
+<div class="sheet-layout">
 <div class="passport">
 
   <!-- Wire top strip -->
@@ -1835,12 +2203,9 @@
       <div class="header-level-row">
         <div class="header-level-group">
           <span class="header-level-label">LVL</span>
-          <input class="header-level-input" type="text" maxlength="3" placeholder="1" spellcheck="false">
+          <input class="header-level-input" id="total-level" type="text" maxlength="3" placeholder="0" readonly spellcheck="false" title="Auto-calculated from attributes, feats, happenings &amp; weapon levels">
         </div>
-        <div class="header-level-group">
-          <span class="header-level-label">EXP</span>
-          <input class="header-exp-input" type="text" maxlength="8" placeholder="0" spellcheck="false">
-        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(0,229,255,0.25);letter-spacing:.12em;align-self:flex-end;padding-bottom:3px;">AUTO·CALC</div>
       </div>
     </div>
     <div class="header-right">
@@ -1863,14 +2228,24 @@
           <div class="rivet-br rivet-bl"></div>
           <div class="rivet-br rivet-br-pos"></div>
           <span class="field-label">▸ REGISTERED DESIGNATION</span>
-          <input class="etch-field large" type="text" placeholder="ENTER NAME" spellcheck="false">
+          <input id="char-name" class="etch-field large" type="text" placeholder="ENTER NAME" spellcheck="false">
         </div>
         <!-- Race -->
         <div class="plate riveted-all id-mini-plate">
           <div class="rivet-br rivet-bl"></div>
           <div class="rivet-br rivet-br-pos"></div>
           <span class="field-label">▸ RACE / SPECIES</span>
-          <input class="etch-field" type="text" placeholder="——" spellcheck="false">
+          <select class="etch-select" id="race-select">
+            <option value="" disabled selected>——</option>
+            <option value="Human">Human</option>
+            <option value="Haptapian">Haptapian</option>
+            <option value="Foltian">Foltian</option>
+            <option value="Sluginish">Sluginish</option>
+            <option value="Muldion">Muldion</option>
+            <option value="Verscar">Verscar</option>
+            <option value="Ssarax">Ssarax</option>
+          </select>
+          <input class="etch-field print-select-input" id="race-print" type="text" placeholder="——" spellcheck="false">
         </div>
       </div>
 
@@ -1944,53 +2319,66 @@
         </div>
       </div>
 
+      <!-- Caste Passive -->
+      <div id="caste-passive-plate" class="caste-passive-plate">
+        <div class="caste-passive-name" id="caste-passive-name">PASSIVE ABILITY</div>
+        <div class="caste-passive-desc" id="caste-passive-desc"></div>
+        <label class="caste-passive-rest">
+          <input type="checkbox" class="caste-passive-cb" id="caste-passive-cb">
+          <span>ONCE PER REST — MARK AS USED</span>
+        </label>
+      </div>
+
       <!-- Core Attributes -->
       <div class="plate riveted-all abilities-plate">
         <div class="rivet-br rivet-bl"></div>
         <div class="rivet-br rivet-br-pos"></div>
-        <div class="section-header">◈ CORE ATTRIBUTES — PRIMARY STATISTICS</div>
+        <div id="ability-points-bar" style="display:flex;justify-content:space-between;align-items:baseline;font-family:'Orbitron',sans-serif;font-size:8px;color:var(--text-dim);letter-spacing:0.3em;text-transform:uppercase;border-bottom:1px solid var(--metal-shine);padding-bottom:4px;margin-bottom:8px;">
+          <span>◈ CORE ATTRIBUTES — PRIMARY STATISTICS</span>
+          <span>CREATION PTS:&nbsp;<span id="ability-pts-value" style="color:var(--gold,#d4af37);">6</span></span>
+        </div>
         <div class="abilities-row">
           <div class="ability-cell">
             <div class="ability-label"><span>S</span><span>T</span><span>R</span></div>
-            <div class="ability-box"><input type="text" maxlength="2" placeholder="—"></div>
+            <div class="ability-box"><input id="stat-str" type="number" min="7" max="15" value="10" placeholder="10"></div>
           </div>
           <div class="ability-cell">
             <div class="ability-label"><span>A</span><span>G</span><span>I</span></div>
-            <div class="ability-box"><input id="stat-agi" type="text" maxlength="2" placeholder="—"></div>
+            <div class="ability-box"><input id="stat-agi" type="number" min="7" max="15" value="10" placeholder="10"></div>
           </div>
           <div class="ability-cell">
             <div class="ability-label"><span>V</span><span>I</span><span>G</span></div>
-            <div class="ability-box"><input type="text" maxlength="2" placeholder="—"></div>
+            <div class="ability-box"><input id="stat-vig" type="number" min="7" max="15" value="10" placeholder="10"></div>
           </div>
           <div class="ability-cell">
             <div class="ability-label"><span>G</span><span>E</span><span>N</span></div>
-            <div class="ability-box"><input type="text" maxlength="2" placeholder="—"></div>
+            <div class="ability-box"><input id="stat-gen" type="number" min="7" max="15" value="10" placeholder="10"></div>
           </div>
           <div class="ability-cell">
             <div class="ability-label"><span>C</span><span>U</span><span>N</span></div>
-            <div class="ability-box"><input type="text" maxlength="2" placeholder="—"></div>
+            <div class="ability-box"><input id="stat-cun" type="number" min="7" max="15" value="10" placeholder="10"></div>
           </div>
           <div class="ability-cell">
             <div class="ability-label"><span>A</span><span>U</span><span>R</span></div>
-            <div class="ability-box"><input type="text" maxlength="2" placeholder="—"></div>
+            <div class="ability-box"><input id="stat-aur" type="number" min="7" max="15" value="10" placeholder="10"></div>
           </div>
         </div>
         <div class="derived-row">
           <div class="derived-cell">
             <div class="derived-label">INITIATIVE</div>
-            <div class="derived-box"><input type="text" maxlength="2" placeholder="—"></div>
+            <div class="derived-box"><input id="derived-initiative" type="text" maxlength="2" placeholder="—" readonly></div>
           </div>
           <div class="derived-cell">
             <div class="derived-label">CARRY LIMIT</div>
-            <div class="derived-box"><input type="text" maxlength="3" placeholder="—"></div>
+            <div class="derived-box"><input id="derived-carry" type="text" maxlength="3" placeholder="—" readonly></div>
           </div>
           <div class="derived-cell">
             <div class="derived-label">PSY RESIST</div>
-            <div class="derived-box"><input type="text" maxlength="2" placeholder="—"></div>
+            <div class="derived-box"><input id="derived-psyresist" type="text" maxlength="2" placeholder="—" readonly></div>
           </div>
           <div class="derived-cell">
             <div class="derived-label">MOVEMENT</div>
-            <div class="derived-box"><input type="text" maxlength="2" placeholder="—"></div>
+            <div class="derived-box"><input id="derived-movement" type="text" maxlength="2" placeholder="—" readonly></div>
           </div>
         </div>
         <!-- Combat Status merged -->
@@ -2044,9 +2432,9 @@
             <div class="rivet-br rivet-br-pos"></div>
             <span class="field-label">▸ HEALTH</span>
             <div class="fraction-field">
-              <input class="fraction-input" type="text" maxlength="3" placeholder="0" style="color: var(--wire-green);">
+              <input id="health-cur" class="fraction-input" type="text" maxlength="3" placeholder="0" style="color: var(--wire-green);">
               <span class="fraction-slash">/</span>
-              <input class="fraction-input" type="text" maxlength="3" placeholder="0" style="color: var(--wire-green);">
+              <input id="health-max" class="fraction-input" type="text" maxlength="3" placeholder="0" style="color: var(--wire-green);" readonly>
             </div>
           </div>
           <div class="plate riveted-all vitals-plate">
@@ -2054,9 +2442,9 @@
             <div class="rivet-br rivet-br-pos"></div>
             <span class="field-label">▸ STAMINA</span>
             <div class="fraction-field">
-              <input class="fraction-input" type="text" maxlength="3" placeholder="0" style="color: var(--wire-gold);">
+              <input id="stamina-cur" class="fraction-input" type="text" maxlength="3" placeholder="0" style="color: var(--wire-gold);">
               <span class="fraction-slash">/</span>
-              <input class="fraction-input" type="text" maxlength="3" placeholder="0" style="color: var(--wire-gold);">
+              <input id="stamina-max" class="fraction-input" type="text" maxlength="3" placeholder="0" style="color: var(--wire-gold);" readonly>
             </div>
           </div>
         </div>
@@ -2096,43 +2484,104 @@
       <div class="section-header">◈ COMBAT REGISTRY — AUTHORIZED ATTACK PROTOCOLS</div>
       <!-- Column headers -->
       <div class="attack-row" style="margin-bottom:2px; padding-bottom:4px; border-bottom: 1px solid rgba(0,229,255,0.2);">
-        <div class="attack-col-label">ATTACK</div>
+        <div class="attack-col-label">WEAPON</div>
         <div class="attack-col-label">DESCRIPTION / EFFECT</div>
         <div class="attack-col-label" style="text-align:center">RANGE</div>
         <div class="attack-col-label" style="text-align:center">DAMAGE</div>
-        <div class="attack-col-label" style="text-align:center">ATTRIBUTE</div>
+        <div class="attack-col-label" style="text-align:center">ATTR</div>
+        <div class="attack-col-label" style="text-align:center">LV</div>
       </div>
-      <!-- Attack 1: Bash (prefilled) -->
+      <!-- Attack 1: pre-select BASH -->
       <div class="attack-row">
-        <input class="attack-input prefilled" type="text" value="BASH" spellcheck="false">
-        <input class="attack-input" type="text" placeholder="Melee strike — standard bludgeon" spellcheck="false">
-        <input class="attack-input" type="text" placeholder="MELEE" style="text-align:center">
-        <input class="attack-input" type="text" placeholder="——" style="text-align:center">
-        <input class="attack-input" type="text" placeholder="STR" style="text-align:center; color:var(--wire-gold)">
+        <select class="etch-select attack-select" style="font-size:10px" onchange="fillWeapon(this)"></select>
+        <input class="attack-input" type="text" placeholder="——" readonly spellcheck="false">
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center" readonly>
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center" readonly>
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center; color:var(--wire-gold)">
+        <input class="attack-lv-input" type="text" placeholder="0" maxlength="2">
       </div>
       <!-- Attack 2 -->
       <div class="attack-row">
-        <input class="attack-input" type="text" placeholder="——" spellcheck="false">
-        <input class="attack-input" type="text" placeholder="——" spellcheck="false">
-        <input class="attack-input" type="text" placeholder="——" style="text-align:center">
-        <input class="attack-input" type="text" placeholder="——" style="text-align:center">
+        <select class="etch-select attack-select" style="font-size:10px" onchange="fillWeapon(this)"></select>
+        <input class="attack-input" type="text" placeholder="——" readonly spellcheck="false">
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center" readonly>
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center" readonly>
         <input class="attack-input" type="text" placeholder="——" style="text-align:center; color:var(--wire-gold)">
+        <input class="attack-lv-input" type="text" placeholder="0" maxlength="2">
       </div>
       <!-- Attack 3 -->
       <div class="attack-row">
-        <input class="attack-input" type="text" placeholder="——" spellcheck="false">
-        <input class="attack-input" type="text" placeholder="——" spellcheck="false">
-        <input class="attack-input" type="text" placeholder="——" style="text-align:center">
-        <input class="attack-input" type="text" placeholder="——" style="text-align:center">
+        <select class="etch-select attack-select" style="font-size:10px" onchange="fillWeapon(this)"></select>
+        <input class="attack-input" type="text" placeholder="——" readonly spellcheck="false">
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center" readonly>
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center" readonly>
         <input class="attack-input" type="text" placeholder="——" style="text-align:center; color:var(--wire-gold)">
+        <input class="attack-lv-input" type="text" placeholder="0" maxlength="2">
       </div>
       <!-- Attack 4 -->
       <div class="attack-row">
-        <input class="attack-input" type="text" placeholder="——" spellcheck="false">
-        <input class="attack-input" type="text" placeholder="——" spellcheck="false">
-        <input class="attack-input" type="text" placeholder="——" style="text-align:center">
-        <input class="attack-input" type="text" placeholder="——" style="text-align:center">
+        <select class="etch-select attack-select" style="font-size:10px" onchange="fillWeapon(this)"></select>
+        <input class="attack-input" type="text" placeholder="——" readonly spellcheck="false">
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center" readonly>
+        <input class="attack-input" type="text" placeholder="——" style="text-align:center" readonly>
         <input class="attack-input" type="text" placeholder="——" style="text-align:center; color:var(--wire-gold)">
+        <input class="attack-lv-input" type="text" placeholder="0" maxlength="2">
+      </div>
+    </div>
+
+    <!-- ── PSIONIC HAPPENINGS ── -->
+    <div id="psionic-plate" class="plate riveted-all psionic-plate">
+      <div class="rivet-br rivet-bl"></div>
+      <div class="rivet-br rivet-br-pos"></div>
+      <div class="section-header">◈ PSIONIC HAPPENINGS REGISTRY — ACTIVE PHENOMENA</div>
+      <!-- Column headers -->
+      <div class="psionic-row" style="border-bottom:1px solid rgba(0,229,255,0.2);margin-bottom:3px;padding-bottom:4px;">
+        <div style="font-family:'Orbitron',sans-serif;font-size:6px;color:var(--text-dim);letter-spacing:.2em">HAPPENING NAME</div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:6px;color:var(--text-dim);letter-spacing:.2em;text-align:center">● ● ● ● ● ● &nbsp;POWER POINTS</div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:6px;color:var(--text-dim);letter-spacing:.2em;text-align:center">DOM·ATTR</div>
+        <div style="font-family:'Orbitron',sans-serif;font-size:6px;color:var(--text-dim);letter-spacing:.2em;text-align:center">LV</div>
+      </div>
+      <!-- Happening 1 -->
+      <div class="psionic-row">
+        <input class="attack-input" type="text" placeholder="—— happening name ——" spellcheck="false">
+        <div class="psionic-pips"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"></div>
+        <select class="etch-select" style="font-size:9px;"><option value="">——</option><option>STR</option><option>AGI</option><option>VIG</option><option>GEN</option><option>CUN</option><option>AUR</option></select>
+        <input class="attack-lv-input psionic-lv" type="text" placeholder="0" maxlength="2">
+      </div>
+      <!-- Happening 2 -->
+      <div class="psionic-row">
+        <input class="attack-input" type="text" placeholder="—— happening name ——" spellcheck="false">
+        <div class="psionic-pips"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"></div>
+        <select class="etch-select" style="font-size:9px;"><option value="">——</option><option>STR</option><option>AGI</option><option>VIG</option><option>GEN</option><option>CUN</option><option>AUR</option></select>
+        <input class="attack-lv-input psionic-lv" type="text" placeholder="0" maxlength="2">
+      </div>
+      <!-- Happening 3 -->
+      <div class="psionic-row">
+        <input class="attack-input" type="text" placeholder="—— happening name ——" spellcheck="false">
+        <div class="psionic-pips"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"></div>
+        <select class="etch-select" style="font-size:9px;"><option value="">——</option><option>STR</option><option>AGI</option><option>VIG</option><option>GEN</option><option>CUN</option><option>AUR</option></select>
+        <input class="attack-lv-input psionic-lv" type="text" placeholder="0" maxlength="2">
+      </div>
+      <!-- Happening 4 -->
+      <div class="psionic-row">
+        <input class="attack-input" type="text" placeholder="—— happening name ——" spellcheck="false">
+        <div class="psionic-pips"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"></div>
+        <select class="etch-select" style="font-size:9px;"><option value="">——</option><option>STR</option><option>AGI</option><option>VIG</option><option>GEN</option><option>CUN</option><option>AUR</option></select>
+        <input class="attack-lv-input psionic-lv" type="text" placeholder="0" maxlength="2">
+      </div>
+      <!-- Happening 5 -->
+      <div class="psionic-row">
+        <input class="attack-input" type="text" placeholder="—— happening name ——" spellcheck="false">
+        <div class="psionic-pips"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"></div>
+        <select class="etch-select" style="font-size:9px;"><option value="">——</option><option>STR</option><option>AGI</option><option>VIG</option><option>GEN</option><option>CUN</option><option>AUR</option></select>
+        <input class="attack-lv-input psionic-lv" type="text" placeholder="0" maxlength="2">
+      </div>
+      <!-- Happening 6 -->
+      <div class="psionic-row">
+        <input class="attack-input" type="text" placeholder="—— happening name ——" spellcheck="false">
+        <div class="psionic-pips"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"><input type="checkbox" class="psionic-pip"></div>
+        <select class="etch-select" style="font-size:9px;"><option value="">——</option><option>STR</option><option>AGI</option><option>VIG</option><option>GEN</option><option>CUN</option><option>AUR</option></select>
+        <input class="attack-lv-input psionic-lv" type="text" placeholder="0" maxlength="2">
       </div>
     </div>
 
@@ -2298,63 +2747,85 @@
       </div>
 
     </div>
+</div><!-- /body-wrapper -->
 
-    <!-- ── CLOTHING + CREDITS ── -->
+  <!-- Wire bottom strip -->
+  <div class="wire-strip-bottom"></div>
+
+  <!-- ═══ FOOTER ═══ -->
+  <div class="footer">
+    <div class="footer-code">COSMIC PROTOCOL · CHAR-SHEET · REV 2.1 · STELLAR REGISTRY AUTHORITY</div>
+    <div class="mrz-strip">CP&lt;GALACTIC&lt;PASSPORT&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>
+    <div class="footer-code">VOID WHERE PROHIBITED · VALID ACROSS ALL SECTORS</div>
+  </div>
+
+</div><!-- /passport -->
+
+<!-- Page flip button — lives outside both pages so it persists when either page is hidden -->
+<button class="page-flip-btn" id="flip-btn" onclick="flipPage()" title="Switch page">
+  <span class="flip-arrow" id="flip-arrow">&#9654;</span>
+  <span class="flip-label" id="flip-label">PAGE 2</span>
+</button>
+
+<!-- ══ SHEET PAGE 2: BACKGROUND & INVENTORY ══ -->
+<div class="sheet-page-2 passport" id="sheet-page-2">
+  <!-- Page flip button also shows on page 2 -->
+  <div class="wire-strip-top"></div>
+  <div class="header" style="padding:10px 20px 8px;">
+    <div class="header-text">
+      <div class="passport-subtitle" style="letter-spacing:0.2em;">COSMIC PROTOCOL · CHARACTER BACKGROUND &amp; INVENTORY MANIFEST · PAGE 2</div>
+    </div>
+  </div>
+  <div class="body-wrapper">
+
+    <!-- Background -->
+    <div class="plate riveted-all" style="padding:12px;margin-bottom:10px;">
+      <div class="rivet-br rivet-bl"></div>
+      <div class="rivet-br rivet-br-pos"></div>
+      <div class="section-header" style="margin-bottom:8px;">◈ CHARACTER BACKGROUND — HISTORY &amp; NOTES</div>
+      <textarea class="bg-textarea" placeholder="Enter character history, origin story, motivations, allegiances, affiliations, notable events..."></textarea>
+    </div>
+
+    <!-- Worn Equipment + Credits -->
     <div class="equipment-row">
-      <!-- Clothing -->
       <div class="plate riveted-all clothing-plate">
         <div class="rivet-br rivet-bl"></div>
         <div class="rivet-br rivet-br-pos"></div>
         <div class="section-header">◈ WORN EQUIPMENT — APPAREL MANIFEST</div>
         <div class="clothing-grid">
-          <!-- Headgear -->
           <div class="clothing-slot">
             <div class="clothing-icon">🪖</div>
             <div class="clothing-slot-label">HEADGEAR</div>
-            <input class="clothing-item-input" type="text" placeholder="slot 1" spellcheck="false">
-            <input class="clothing-item-input" type="text" placeholder="slot 2" spellcheck="false">
+            <select class="etch-select armor-select" style="font-size:9px;" onchange="updateArmorTotals()"><option value="">— none —</option><optgroup label="─ TIER I ─"><option data-mit="1" data-def="2" data-ste="6" data-tier="1">Stealth Suit</option><option data-mit="1" data-def="2" data-ste="0" data-tier="1">Flight Suit</option><option data-mit="1" data-def="2" data-ste="4" data-tier="1">Optic Armor (Light)</option></optgroup><optgroup label="─ TIER II ─"><option data-mit="4" data-def="4" data-ste="-1" data-tier="2">Carbon Fiber Armor</option><option data-mit="3" data-def="4" data-ste="2" data-tier="2">Optic Armor (Medium)</option><option data-mit="3" data-def="4" data-ste="0" data-tier="2">Bio-Armor (Medium)</option></optgroup><optgroup label="─ TIER III ─"><option data-mit="6" data-def="6" data-ste="-4" data-tier="3">Heavy Armor</option><option data-mit="7" data-def="6" data-ste="-6" data-tier="3">Plate Armor</option><option data-mit="4" data-def="6" data-ste="0" data-tier="3">Bio-Exoskeleton</option></optgroup><optgroup label="─ TIER IV ─"><option data-mit="5" data-def="6" data-ste="2" data-tier="4">Optic Armor (Heavy)</option><option data-mit="2" data-def="2" data-ste="8" data-tier="4">Bio-Stealth Armor</option></optgroup><optgroup label="─ SHIELD ─"><option data-mit="1" data-def="2" data-ste="-2" data-tier="1">Hand Shield</option><option data-mit="2" data-def="4" data-ste="-4" data-tier="2">Personal Body Shield</option></optgroup></select>
+            <select class="etch-select armor-select" style="font-size:9px;" onchange="updateArmorTotals()"><option value="">— none —</option><optgroup label="─ TIER I ─"><option data-mit="1" data-def="2" data-ste="6" data-tier="1">Stealth Suit</option><option data-mit="1" data-def="2" data-ste="0" data-tier="1">Flight Suit</option><option data-mit="1" data-def="2" data-ste="4" data-tier="1">Optic Armor (Light)</option></optgroup><optgroup label="─ TIER II ─"><option data-mit="4" data-def="4" data-ste="-1" data-tier="2">Carbon Fiber Armor</option><option data-mit="3" data-def="4" data-ste="2" data-tier="2">Optic Armor (Medium)</option><option data-mit="3" data-def="4" data-ste="0" data-tier="2">Bio-Armor (Medium)</option></optgroup><optgroup label="─ TIER III ─"><option data-mit="6" data-def="6" data-ste="-4" data-tier="3">Heavy Armor</option><option data-mit="7" data-def="6" data-ste="-6" data-tier="3">Plate Armor</option><option data-mit="4" data-def="6" data-ste="0" data-tier="3">Bio-Exoskeleton</option></optgroup><optgroup label="─ TIER IV ─"><option data-mit="5" data-def="6" data-ste="2" data-tier="4">Optic Armor (Heavy)</option><option data-mit="2" data-def="2" data-ste="8" data-tier="4">Bio-Stealth Armor</option></optgroup><optgroup label="─ SHIELD ─"><option data-mit="1" data-def="2" data-ste="-2" data-tier="1">Hand Shield</option><option data-mit="2" data-def="4" data-ste="-4" data-tier="2">Personal Body Shield</option></optgroup></select>
           </div>
-          <!-- Torso -->
           <div class="clothing-slot">
             <div class="clothing-icon">🦺</div>
             <div class="clothing-slot-label">TORSO</div>
-            <input class="clothing-item-input" type="text" placeholder="slot 1" spellcheck="false">
-            <input class="clothing-item-input" type="text" placeholder="slot 2" spellcheck="false">
+            <select class="etch-select armor-select" style="font-size:9px;" onchange="updateArmorTotals()"><option value="">— none —</option><optgroup label="─ TIER I ─"><option data-mit="1" data-def="2" data-ste="6" data-tier="1">Stealth Suit</option><option data-mit="1" data-def="2" data-ste="0" data-tier="1">Flight Suit</option><option data-mit="1" data-def="2" data-ste="4" data-tier="1">Optic Armor (Light)</option></optgroup><optgroup label="─ TIER II ─"><option data-mit="4" data-def="4" data-ste="-1" data-tier="2">Carbon Fiber Armor</option><option data-mit="3" data-def="4" data-ste="2" data-tier="2">Optic Armor (Medium)</option><option data-mit="3" data-def="4" data-ste="0" data-tier="2">Bio-Armor (Medium)</option></optgroup><optgroup label="─ TIER III ─"><option data-mit="6" data-def="6" data-ste="-4" data-tier="3">Heavy Armor</option><option data-mit="7" data-def="6" data-ste="-6" data-tier="3">Plate Armor</option><option data-mit="4" data-def="6" data-ste="0" data-tier="3">Bio-Exoskeleton</option></optgroup><optgroup label="─ TIER IV ─"><option data-mit="5" data-def="6" data-ste="2" data-tier="4">Optic Armor (Heavy)</option><option data-mit="2" data-def="2" data-ste="8" data-tier="4">Bio-Stealth Armor</option></optgroup><optgroup label="─ SHIELD ─"><option data-mit="1" data-def="2" data-ste="-2" data-tier="1">Hand Shield</option><option data-mit="2" data-def="4" data-ste="-4" data-tier="2">Personal Body Shield</option></optgroup></select>
+            <select class="etch-select armor-select" style="font-size:9px;" onchange="updateArmorTotals()"><option value="">— none —</option><optgroup label="─ TIER I ─"><option data-mit="1" data-def="2" data-ste="6" data-tier="1">Stealth Suit</option><option data-mit="1" data-def="2" data-ste="0" data-tier="1">Flight Suit</option><option data-mit="1" data-def="2" data-ste="4" data-tier="1">Optic Armor (Light)</option></optgroup><optgroup label="─ TIER II ─"><option data-mit="4" data-def="4" data-ste="-1" data-tier="2">Carbon Fiber Armor</option><option data-mit="3" data-def="4" data-ste="2" data-tier="2">Optic Armor (Medium)</option><option data-mit="3" data-def="4" data-ste="0" data-tier="2">Bio-Armor (Medium)</option></optgroup><optgroup label="─ TIER III ─"><option data-mit="6" data-def="6" data-ste="-4" data-tier="3">Heavy Armor</option><option data-mit="7" data-def="6" data-ste="-6" data-tier="3">Plate Armor</option><option data-mit="4" data-def="6" data-ste="0" data-tier="3">Bio-Exoskeleton</option></optgroup><optgroup label="─ TIER IV ─"><option data-mit="5" data-def="6" data-ste="2" data-tier="4">Optic Armor (Heavy)</option><option data-mit="2" data-def="2" data-ste="8" data-tier="4">Bio-Stealth Armor</option></optgroup><optgroup label="─ SHIELD ─"><option data-mit="1" data-def="2" data-ste="-2" data-tier="1">Hand Shield</option><option data-mit="2" data-def="4" data-ste="-4" data-tier="2">Personal Body Shield</option></optgroup></select>
           </div>
-          <!-- Legs -->
           <div class="clothing-slot">
             <div class="clothing-icon">👖</div>
             <div class="clothing-slot-label">LEGS</div>
-            <input class="clothing-item-input" type="text" placeholder="slot 1" spellcheck="false">
-            <input class="clothing-item-input" type="text" placeholder="slot 2" spellcheck="false">
+            <select class="etch-select armor-select" style="font-size:9px;" onchange="updateArmorTotals()"><option value="">— none —</option><optgroup label="─ TIER I ─"><option data-mit="1" data-def="2" data-ste="6" data-tier="1">Stealth Suit</option><option data-mit="1" data-def="2" data-ste="0" data-tier="1">Flight Suit</option><option data-mit="1" data-def="2" data-ste="4" data-tier="1">Optic Armor (Light)</option></optgroup><optgroup label="─ TIER II ─"><option data-mit="4" data-def="4" data-ste="-1" data-tier="2">Carbon Fiber Armor</option><option data-mit="3" data-def="4" data-ste="2" data-tier="2">Optic Armor (Medium)</option><option data-mit="3" data-def="4" data-ste="0" data-tier="2">Bio-Armor (Medium)</option></optgroup><optgroup label="─ TIER III ─"><option data-mit="6" data-def="6" data-ste="-4" data-tier="3">Heavy Armor</option><option data-mit="7" data-def="6" data-ste="-6" data-tier="3">Plate Armor</option><option data-mit="4" data-def="6" data-ste="0" data-tier="3">Bio-Exoskeleton</option></optgroup><optgroup label="─ TIER IV ─"><option data-mit="5" data-def="6" data-ste="2" data-tier="4">Optic Armor (Heavy)</option><option data-mit="2" data-def="2" data-ste="8" data-tier="4">Bio-Stealth Armor</option></optgroup><optgroup label="─ SHIELD ─"><option data-mit="1" data-def="2" data-ste="-2" data-tier="1">Hand Shield</option><option data-mit="2" data-def="4" data-ste="-4" data-tier="2">Personal Body Shield</option></optgroup></select>
+            <select class="etch-select armor-select" style="font-size:9px;" onchange="updateArmorTotals()"><option value="">— none —</option><optgroup label="─ TIER I ─"><option data-mit="1" data-def="2" data-ste="6" data-tier="1">Stealth Suit</option><option data-mit="1" data-def="2" data-ste="0" data-tier="1">Flight Suit</option><option data-mit="1" data-def="2" data-ste="4" data-tier="1">Optic Armor (Light)</option></optgroup><optgroup label="─ TIER II ─"><option data-mit="4" data-def="4" data-ste="-1" data-tier="2">Carbon Fiber Armor</option><option data-mit="3" data-def="4" data-ste="2" data-tier="2">Optic Armor (Medium)</option><option data-mit="3" data-def="4" data-ste="0" data-tier="2">Bio-Armor (Medium)</option></optgroup><optgroup label="─ TIER III ─"><option data-mit="6" data-def="6" data-ste="-4" data-tier="3">Heavy Armor</option><option data-mit="7" data-def="6" data-ste="-6" data-tier="3">Plate Armor</option><option data-mit="4" data-def="6" data-ste="0" data-tier="3">Bio-Exoskeleton</option></optgroup><optgroup label="─ TIER IV ─"><option data-mit="5" data-def="6" data-ste="2" data-tier="4">Optic Armor (Heavy)</option><option data-mit="2" data-def="2" data-ste="8" data-tier="4">Bio-Stealth Armor</option></optgroup><optgroup label="─ SHIELD ─"><option data-mit="1" data-def="2" data-ste="-2" data-tier="1">Hand Shield</option><option data-mit="2" data-def="4" data-ste="-4" data-tier="2">Personal Body Shield</option></optgroup></select>
           </div>
-          <!-- Feet -->
           <div class="clothing-slot">
             <div class="clothing-icon">🥾</div>
             <div class="clothing-slot-label">FEET</div>
-            <input class="clothing-item-input" type="text" placeholder="slot 1" spellcheck="false">
-            <input class="clothing-item-input" type="text" placeholder="slot 2" spellcheck="false">
+            <select class="etch-select armor-select" style="font-size:9px;" onchange="updateArmorTotals()"><option value="">— none —</option><optgroup label="─ TIER I ─"><option data-mit="1" data-def="2" data-ste="6" data-tier="1">Stealth Suit</option><option data-mit="1" data-def="2" data-ste="0" data-tier="1">Flight Suit</option><option data-mit="1" data-def="2" data-ste="4" data-tier="1">Optic Armor (Light)</option></optgroup><optgroup label="─ TIER II ─"><option data-mit="4" data-def="4" data-ste="-1" data-tier="2">Carbon Fiber Armor</option><option data-mit="3" data-def="4" data-ste="2" data-tier="2">Optic Armor (Medium)</option><option data-mit="3" data-def="4" data-ste="0" data-tier="2">Bio-Armor (Medium)</option></optgroup><optgroup label="─ TIER III ─"><option data-mit="6" data-def="6" data-ste="-4" data-tier="3">Heavy Armor</option><option data-mit="7" data-def="6" data-ste="-6" data-tier="3">Plate Armor</option><option data-mit="4" data-def="6" data-ste="0" data-tier="3">Bio-Exoskeleton</option></optgroup><optgroup label="─ TIER IV ─"><option data-mit="5" data-def="6" data-ste="2" data-tier="4">Optic Armor (Heavy)</option><option data-mit="2" data-def="2" data-ste="8" data-tier="4">Bio-Stealth Armor</option></optgroup><optgroup label="─ SHIELD ─"><option data-mit="1" data-def="2" data-ste="-2" data-tier="1">Hand Shield</option><option data-mit="2" data-def="4" data-ste="-4" data-tier="2">Personal Body Shield</option></optgroup></select>
+            <select class="etch-select armor-select" style="font-size:9px;" onchange="updateArmorTotals()"><option value="">— none —</option><optgroup label="─ TIER I ─"><option data-mit="1" data-def="2" data-ste="6" data-tier="1">Stealth Suit</option><option data-mit="1" data-def="2" data-ste="0" data-tier="1">Flight Suit</option><option data-mit="1" data-def="2" data-ste="4" data-tier="1">Optic Armor (Light)</option></optgroup><optgroup label="─ TIER II ─"><option data-mit="4" data-def="4" data-ste="-1" data-tier="2">Carbon Fiber Armor</option><option data-mit="3" data-def="4" data-ste="2" data-tier="2">Optic Armor (Medium)</option><option data-mit="3" data-def="4" data-ste="0" data-tier="2">Bio-Armor (Medium)</option></optgroup><optgroup label="─ TIER III ─"><option data-mit="6" data-def="6" data-ste="-4" data-tier="3">Heavy Armor</option><option data-mit="7" data-def="6" data-ste="-6" data-tier="3">Plate Armor</option><option data-mit="4" data-def="6" data-ste="0" data-tier="3">Bio-Exoskeleton</option></optgroup><optgroup label="─ TIER IV ─"><option data-mit="5" data-def="6" data-ste="2" data-tier="4">Optic Armor (Heavy)</option><option data-mit="2" data-def="2" data-ste="8" data-tier="4">Bio-Stealth Armor</option></optgroup><optgroup label="─ SHIELD ─"><option data-mit="1" data-def="2" data-ste="-2" data-tier="1">Hand Shield</option><option data-mit="2" data-def="4" data-ste="-4" data-tier="2">Personal Body Shield</option></optgroup></select>
           </div>
         </div>
-        <!-- Armor Manifest merged into Worn Equipment -->
         <div class="armor-manifest-row">
-          <span class="armor-manifest-label">▸ ARMOR</span>
-          <div class="armor-manifest-field">
-            <span class="armor-manifest-field-label">TIER</span>
-            <input class="armor-manifest-input" type="text" maxlength="6" placeholder="—" spellcheck="false">
-          </div>
-          <div class="armor-manifest-field">
-            <span class="armor-manifest-field-label">MITIGATION</span>
-            <input class="armor-manifest-input" type="text" maxlength="4" placeholder="—" spellcheck="false">
-          </div>
-          <div class="armor-manifest-field">
-            <span class="armor-manifest-field-label">STEALTH PEN</span>
-            <input class="armor-manifest-input" type="text" maxlength="4" placeholder="—" spellcheck="false">
-          </div>
+          <span class="armor-manifest-label">▸ ARMOR <span style="font-size:7px;color:var(--text-dim);">(auto·calc)</span></span>
+          <div class="armor-manifest-field"><span class="armor-manifest-field-label">TIER</span><input class="armor-manifest-input" id="armor-tier" type="text" maxlength="6" placeholder="—" readonly></div>
+          <div class="armor-manifest-field"><span class="armor-manifest-field-label">MITIGATION</span><input class="armor-manifest-input" id="armor-mitigation" type="text" maxlength="4" placeholder="0" readonly></div>
+          <div class="armor-manifest-field"><span class="armor-manifest-field-label">DEFENSE</span><input class="armor-manifest-input" id="armor-defense" type="text" maxlength="5" placeholder="0" readonly></div>
+          <div class="armor-manifest-field"><span class="armor-manifest-field-label">STEALTH</span><input class="armor-manifest-input" id="armor-stealth" type="text" maxlength="5" placeholder="0" readonly></div>
         </div>
       </div>
-
-      <!-- Credits Card -->
       <div class="credits-plate">
         <div class="credits-card-inner">
           <div class="card-top">
@@ -2385,7 +2856,7 @@
       </div>
     </div>
 
-    <!-- ── BAG ── -->
+    <!-- Carrier Manifest -->
     <div class="plate riveted-all bag-plate">
       <div class="rivet-br rivet-bl"></div>
       <div class="rivet-br rivet-br-pos"></div>
@@ -2394,18 +2865,18 @@
         <div class="section-header" style="border:none;margin:0;padding:0">◈ CARRIER MANIFEST — BAG CONTENTS</div>
       </div>
       <div class="bag-grid">
-        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
-        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
-        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
-        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
-        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
-        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
-        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
-        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
-        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
-        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
-        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
-        <input class="bag-item-input" type="text" placeholder="item ——————" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ――――――" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ――――――" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ――――――" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ――――――" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ――――――" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ――――――" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ――――――" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ――――――" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ――――――" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ――――――" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ――――――" spellcheck="false">
+        <input class="bag-item-input" type="text" placeholder="item ――――――" spellcheck="false">
       </div>
       <div class="bag-capacity">
         <span class="capacity-label">BAG TYPE:</span>
@@ -2417,19 +2888,17 @@
       </div>
     </div>
 
-  </div><!-- /body-wrapper -->
-
-  <!-- Wire bottom strip -->
+  </div><!-- /body-wrapper p2 -->
   <div class="wire-strip-bottom"></div>
-
-  <!-- ═══ FOOTER ═══ -->
   <div class="footer">
-    <div class="footer-code">COSMIC PROTOCOL · CHAR-SHEET · REV 2.1 · STELLAR REGISTRY AUTHORITY</div>
-    <div class="mrz-strip">CP&lt;GALACTIC&lt;PASSPORT&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>
+    <div class="footer-code">COSMIC PROTOCOL · CHAR-SHEET · REV 2.1 · BACKGROUND &amp; INVENTORY · PAGE 2</div>
+    <div class="mrz-strip">CP&lt;GALACTIC&lt;INVENTORY&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>
     <div class="footer-code">VOID WHERE PROHIBITED · VALID ACROSS ALL SECTORS</div>
   </div>
+</div><!-- /sheet-page-2 -->
 
-  <!-- ═══ FIELD GUIDE — LAST PAGE ═══ -->
+
+  <!-- ═══ FIELD GUIDE — SIDEBAR ═══ -->
   <div class="guide-panel">
   <div class="guide-header-bar">
     <div class="guide-title">◈ GALACTIC PASSPORT — FIELD COMPLETION GUIDE</div>
@@ -2442,19 +2911,19 @@
       <div class="guide-card-header">§ 00 · HOW TO CREATE YOUR CHARACTER — ATTRIBUTE GENERATION</div>
       <div class="guide-entry">
         <span class="guide-field">STEP 1 · BASE</span>
-        <p>Every character begins with <strong>10</strong> in each of the six Core Attributes — STR, AGI, VIG, GEN, CUN, and AUR. Write 10 in all six boxes before doing anything else.</p>
+        <p>Every character begins with <strong>10</strong> in each of the six Core Attributes — STR, AGI, VIG, GEN, CUN, and AUR. All six boxes are pre-filled with 10.</p>
       </div>
       <div class="guide-entry">
         <span class="guide-field">STEP 2 · BONUS POINTS</span>
-        <p>You have <strong>5 bonus points</strong> to distribute freely. Assign them to any Core Attribute(s) in any combination — you may stack all 5 into one attribute or spread them across several.</p>
+        <p>You have <strong>6 bonus points</strong> to distribute freely across any Core Attributes in any combination. No single attribute may receive more than <strong>+5</strong> from this allocation.</p>
       </div>
       <div class="guide-entry">
         <span class="guide-field">STEP 3 · TRADE-OFFS</span>
-        <p>Choose up to <strong>3 attributes</strong> to reduce. Remove any number of points from each chosen attribute (minimum of 1 removed per chosen attribute). Every point removed becomes a free point you may add to any of the six Core Attributes, including the ones you reduced.</p>
+        <p>You may subtract up to <strong>3 points total</strong> from any ability or spread across multiple abilities, and reassign those points to other abilities. The <strong>+5 cap still applies</strong> — no ability may receive more than 5 additional points in total from both the bonus allocation and any transferred points combined.</p>
       </div>
       <div class="guide-note">
-        EXAMPLE — Start: all 10s. Bonus: +3 STR, +2 AUR → STR 13, AUR 12. Trade-off: remove 2 from AGI and 1 from GEN → gain 3 free points → +2 VIG, +1 CUN. Final: STR 13 · AGI 8 · VIG 12 · GEN 9 · CUN 11 · AUR 12.<br><br>
-        There is no upper cap during character creation. Your Race and Profession may grant additional bonuses applied after these steps — see the rulebook for details.
+        EXAMPLE — Start: all 10s. Bonus: +4 STR, +2 AUR → overspent (7 pts used, cap is 6). Correct: +4 STR, +2 AUR = 6 pts. Trade-off: subtract 2 from AGI → +2 free pts → add to VIG. Final: STR 14 · AGI 8 · VIG 12 · GEN 10 · CUN 10 · AUR 12.<br><br>
+        Race and Caste bonuses are applied <em>after</em> these steps and are not subject to the +5 creation cap — see the Rulebook for details.
       </div>
     </div>
 
@@ -2476,11 +2945,11 @@
       <div class="guide-entry"><span class="guide-field">GEN · Genius</span><p>Intelligence. Covers hacking, medicine, and technical knowledge.</p></div>
       <div class="guide-entry"><span class="guide-field">CUN · Cunning</span><p>Wits and perception. Used for traps, insight, tracking, and trickery.</p></div>
       <div class="guide-entry"><span class="guide-field">AUR · Aura</span><p>Force of personality and Psionic potential. Governs persuasion and mental abilities.</p></div>
-      <div class="guide-entry"><span class="guide-field">ATTRIBUTE MODIFIER</span><p>Each point <strong>above 10</strong> in any attribute grants <strong>+1</strong> to rolls and effects that use it. Each <strong>2 points below 10</strong> apply a <strong>−2</strong> penalty. Partial odd-numbered deficits round down.</p></div>
+      <div class="guide-entry"><span class="guide-field">ATTRIBUTE MODIFIER</span><p>For every <strong>2 points above 10</strong>, gain <strong>+1</strong> to rolls using that attribute. For every <strong>2 points below 10</strong>, suffer <strong>−1</strong>. Odd-point differences round down toward zero.</p></div>
       <div class="guide-note">
-        MODIFIER TABLE &nbsp;·&nbsp; 10 = ±0 &nbsp;·&nbsp; 11 = +1 &nbsp;·&nbsp; 12 = +2 &nbsp;·&nbsp; 13 = +3 &nbsp;·&nbsp; 14 = +4…<br>
-        9 = −2 &nbsp;·&nbsp; 8 = −2 &nbsp;·&nbsp; 7 = −4 &nbsp;·&nbsp; 6 = −4 &nbsp;·&nbsp; 5 = −6…<br>
-        DERIVED — Initiative: turn order roll. Carry Limit: STR×2. Psy Resist: AUR mod. Movement: tiles per action.
+        MODIFIER TABLE &nbsp;·&nbsp; 10 = ±0 &nbsp;·&nbsp; 11 = ±0 &nbsp;·&nbsp; 12 = +1 &nbsp;·&nbsp; 13 = +1 &nbsp;·&nbsp; 14 = +2 &nbsp;·&nbsp; 15 = +2…<br>
+        9 = ±0 &nbsp;·&nbsp; 8 = −1 &nbsp;·&nbsp; 7 = −1 &nbsp;·&nbsp; 6 = −2 &nbsp;·&nbsp; 5 = −2…<br>
+        DERIVED — Initiative: floor(AGI÷5). Carry Limit: STR×4. Psy Resist: floor(CUN÷5). Movement: AGI+5.
       </div>
     </div>
 
@@ -2502,7 +2971,7 @@
       <div class="guide-card-header">§ 04 · HEALTH &amp; STAMINA — VITALS</div>
       <div class="guide-entry"><span class="guide-field">HEALTH (green)</span><p>Physical hit points. Left box = current HP; right box = maximum HP. Reaching 0 means incapacitation or death.</p></div>
       <div class="guide-entry"><span class="guide-field">STAMINA (gold)</span><p>Exertion pool spent by feats and special abilities. Left = current; right = maximum. Fully replenishes after a full rest.</p></div>
-      <div class="guide-note">Max Health is typically VIG × a class multiplier. Max Stamina is set by your Profession. Consult the rulebook for exact formulas.</div>
+      <div class="guide-note">Max Health = 10 + (VIG × 2) — at VIG 10 this is 30 HP. Health and Stamina are separate pools. Max Stamina = floor(AGI × 2.5) — at AGI 10 this is 25. Stamina replenishes fully after a full rest; Health requires medical treatment or a full rest to recover.</div>
     </div>
 
     <!-- § 05 Combat Ratings -->
@@ -2574,9 +3043,139 @@
   </div>
   </div>
 
-</div>
+</div><!-- /guide-panel -->
+</div><!-- /sheet-layout -->
+</div><!-- /sheet-layout-wrapper -->
 
 <script>
+  // ── WEAPON DATA ──
+  var WEAPONS = {
+    // UNARMED
+    'BASH':                { cat:'UNARMED',       desc:'Standard unarmed strike — bludgeon',                              range:'MELEE',   dmg:'——',     attr:'STR' },
+    // VIBROBLADE
+    'VB-11 Whisperblade':  { cat:'VIBROBLADE',    desc:'Silent; on crit: target loses next reaction',                     range:'MELEE',   dmg:'2×d4',   attr:'STR' },
+    'VB-27 Duelist Edge':  { cat:'VIBROBLADE',    desc:'Shredding; on hit: STR save or pushed 5 ft',                     range:'MELEE',   dmg:'2×d6',   attr:'STR' },
+    'VB-90 Titan Cutter':  { cat:'VIBROBLADE',    desc:'Armor-Piercing; on hit: STR save or knocked prone',              range:'MELEE',   dmg:'1×d10',  attr:'STR' },
+    // SHORT SWORD
+    'VSS-3 Quickfang':     { cat:'SHORT SWORD',   desc:'Silent; on crit: +1 attack die',                                 range:'MELEE',   dmg:'2×d6',   attr:'STR' },
+    'VSS-12 Linebreaker':  { cat:'SHORT SWORD',   desc:'Staggering; on hit: target knocked back 5 ft',                   range:'MELEE',   dmg:'1×d8',   attr:'STR' },
+    'VSS-44 Executioner':  { cat:'SHORT SWORD',   desc:'Armor-Piercing; on roll of 6: bypass armor',                    range:'MELEE',   dmg:'1×d10',  attr:'STR' },
+    // ELECTRIC PIKE
+    'EP-5 Shocklance':     { cat:'ELECTRIC PIKE', desc:'Staggering; on crit: target loses next reaction',                range:'MELEE',   dmg:'1×d8',   attr:'STR' },
+    'EP-19 Arc-Pike':      { cat:'ELECTRIC PIKE', desc:'Overcharge; on roll of 6: bypass armor',                        range:'MELEE',   dmg:'1×d10',  attr:'STR' },
+    'EP-72 Thunder Halberd':{ cat:'ELECTRIC PIKE',desc:'Staggering; on hit: save or knocked back 5 ft',                  range:'MELEE',   dmg:'1×d12',  attr:'STR' },
+    // BIO MELEE
+    'Razorling':           { cat:'BIO MELEE',     desc:'+1 die vs wounded targets',                                      range:'MELEE',   dmg:'2×d4',   attr:'STR' },
+    'Tendril Lash':        { cat:'BIO MELEE',     desc:'Corrosive; on failed save: poisoned, persists',                 range:'MELEE',   dmg:'2×d6',   attr:'STR' },
+    'Crushbeast Maul':     { cat:'BIO MELEE',     desc:'Staggering; reduces armor mitigation by 1',                     range:'MELEE',   dmg:'1×d12',  attr:'STR' },
+    // LASER PISTOL
+    'Needlebeam':          { cat:'LASER PISTOL',  desc:'Silent; on crit: lose next reaction',                           range:'SHORT',   dmg:'2×d4',   attr:'AGI' },
+    'Starflare':           { cat:'LASER PISTOL',  desc:'Overcharge; on roll of 6: bypass armor',                        range:'SHORT',   dmg:'2×d6',   attr:'AGI' },
+    'Sunburst':            { cat:'LASER PISTOL',  desc:'Armor-Piercing; on 6: bypass armor; on crit: lose reaction',    range:'SHORT',   dmg:'1×d8',   attr:'AGI' },
+    // RAIL PISTOL
+    'Micro-Slug':          { cat:'RAIL PISTOL',   desc:'Armor-Piercing; on crit: +1 attack die',                        range:'SHORT',   dmg:'2×d4',   attr:'AGI' },
+    'Kinetic Sidearm':     { cat:'RAIL PISTOL',   desc:'Shredding; on hit: STR save or pushed 5 ft',                    range:'SHORT',   dmg:'2×d6',   attr:'AGI' },
+    'Thunderbolt Compact': { cat:'RAIL PISTOL',   desc:'Staggering; on hit: save or knocked prone',                     range:'SHORT',   dmg:'1×d8',   attr:'AGI' },
+    // BIO PISTOL
+    'Gnatburst':           { cat:'BIO PISTOL',    desc:'+1 die vs wounded targets',                                      range:'SHORT',   dmg:'2×d4',   attr:'AGI' },
+    'Venomshot':           { cat:'BIO PISTOL',    desc:'Corrosive; on failed save: poisoned, persists',                 range:'SHORT',   dmg:'2×d6',   attr:'AGI' },
+    'Hiveburst':           { cat:'BIO PISTOL',    desc:'Shredding; reduces armor mitigation by 1',                      range:'SHORT',   dmg:'1×d8',   attr:'AGI' },
+    // LASER SMALL ARM
+    'Flashcarbine':        { cat:'LASER SMALL ARM',desc:'Silent; on crit: lose next reaction',                          range:'MEDIUM',  dmg:'2×d6',   attr:'AGI' },
+    'Beam Carbine':        { cat:'LASER SMALL ARM',desc:'Overcharge; on roll of 6: bypass armor',                       range:'MEDIUM',  dmg:'1×d8',   attr:'AGI' },
+    'Pulse Repeater':      { cat:'LASER SMALL ARM',desc:'Armor-Piercing; on 6: bypass armor; on crit: lose reaction',   range:'MEDIUM',  dmg:'1×d10',  attr:'AGI' },
+    // RAIL SMALL ARM
+    'Micro-Rail Carbine':  { cat:'RAIL SMALL ARM', desc:'Kinetic; on crit: +1 attack die',                              range:'MEDIUM',  dmg:'2×d6',   attr:'AGI' },
+    'Gauss Carbine':       { cat:'RAIL SMALL ARM', desc:'Staggering; on hit: target knocked back 5 ft',                 range:'MEDIUM',  dmg:'1×d8',   attr:'AGI' },
+    'Storm Repeater':      { cat:'RAIL SMALL ARM', desc:'Shredding; on hit: save or knocked prone',                     range:'MEDIUM',  dmg:'1×d10',  attr:'AGI' },
+    // BIO SMALL ARM
+    'Sporecaster':         { cat:'BIO SMALL ARM',  desc:'Corrosive; reduces armor mitigation by 1',                     range:'MEDIUM',  dmg:'2×d6',   attr:'AGI' },
+    'Mycelium Spitter':    { cat:'BIO SMALL ARM',  desc:'Bio-Adaptive; on failed save: poisoned, persists',             range:'MEDIUM',  dmg:'1×d8',   attr:'AGI' },
+    'Broodburst':          { cat:'BIO SMALL ARM',  desc:'Shredding; +1 die vs wounded targets',                        range:'MEDIUM',  dmg:'1×d10',  attr:'AGI' },
+    // LASER RIFLE
+    'Pinpoint Beam Rifle': { cat:'LASER RIFLE',   desc:'Silent; on crit: lose next reaction',                           range:'LONG',    dmg:'1×d8',   attr:'AGI' },
+    'Pulse Rifle':         { cat:'LASER RIFLE',   desc:'Overcharge; on roll of 6: bypass armor',                        range:'LONG',    dmg:'1×d10',  attr:'AGI' },
+    'Starbreaker':         { cat:'LASER RIFLE',   desc:'Armor-Piercing; on 6: bypass armor; on crit: lose reaction',    range:'LONG',    dmg:'1×d12',  attr:'AGI' },
+    // RAIL RIFLE
+    'Needle Railgun':      { cat:'RAIL RIFLE',    desc:'Kinetic; on crit: +1 attack die',                               range:'LONG',    dmg:'1×d8',   attr:'AGI' },
+    'Gauss Rifle':         { cat:'RAIL RIFLE',    desc:'Impact; on hit: save or knocked prone',                         range:'LONG',    dmg:'1×d10',  attr:'AGI' },
+    'Titan Rail Cannon':   { cat:'RAIL RIFLE',    desc:'Staggering; on hit: save or knocked prone',                     range:'LONG',    dmg:'1×d12',  attr:'AGI' },
+    // BIO RIFLE
+    'Spinecaster':         { cat:'BIO RIFLE',     desc:'+1 die vs wounded targets',                                      range:'LONG',    dmg:'1×d8',   attr:'AGI' },
+    'Acid Maw':            { cat:'BIO RIFLE',     desc:'Corrosive; reduces armor mitigation by 1',                      range:'LONG',    dmg:'1×d10',  attr:'AGI' },
+    'Hive Piercer':        { cat:'BIO RIFLE',     desc:'Shredding; on failed save: poisoned, persists',                 range:'LONG',    dmg:'1×d12',  attr:'AGI' },
+    // LASER SNIPER
+    'Ghostbeam':           { cat:'LASER SNIPER',  desc:'Silent; on crit: lose next reaction',                           range:'EXTREME', dmg:'1×d10',  attr:'AGI' },
+    'Horizon Lance':       { cat:'LASER SNIPER',  desc:'Armor-Piercing; on roll of 6: bypass armor',                    range:'EXTREME', dmg:'1×d12',  attr:'AGI' },
+    'Star-Spear':          { cat:'LASER SNIPER',  desc:'Overcharge; on 6: bypass armor; on crit: lose reaction',        range:'EXTREME', dmg:'1×d12',  attr:'AGI' },
+    // RAIL SNIPER
+    'Micro-Gauss Sniper':  { cat:'RAIL SNIPER',   desc:'Kinetic; on crit: +1 attack die',                               range:'EXTREME', dmg:'1×d10',  attr:'AGI' },
+    'Long-Slug Rifle':     { cat:'RAIL SNIPER',   desc:'Impact; on hit: save or knocked prone',                         range:'EXTREME', dmg:'1×d12',  attr:'AGI' },
+    'Planet Cracker':      { cat:'RAIL SNIPER',   desc:'Staggering; on hit: save or knocked prone',                     range:'EXTREME', dmg:'1×d12',  attr:'AGI' },
+    // BIO SNIPER
+    'Needle Wyrm':         { cat:'BIO SNIPER',    desc:'+1 die vs wounded targets',                                      range:'EXTREME', dmg:'1×d10',  attr:'AGI' },
+    'Piercing Maw':        { cat:'BIO SNIPER',    desc:'Corrosive; reduces armor mitigation by 1',                      range:'EXTREME', dmg:'1×d12',  attr:'AGI' },
+    'Colossus Fang':       { cat:'BIO SNIPER',    desc:'Shredding; on failed save: poisoned, persists',                 range:'EXTREME', dmg:'1×d12',  attr:'AGI' },
+    // LASER RPG
+    'Beam Breacher':       { cat:'LASER RPG',     desc:'Armor-Piercing; on roll of 6: bypass armor',                    range:'LONG',    dmg:'1×d12',  attr:'AGI' },
+    'Siege Lance':         { cat:'LASER RPG',     desc:'Overcharge; on crit: target loses next reaction',               range:'LONG',    dmg:'1×d12',  attr:'AGI' },
+    'Star-Hammer':         { cat:'LASER RPG',     desc:'Staggering; on 6: bypass armor; on crit: lose reaction',        range:'LONG',    dmg:'1×d12',  attr:'AGI' },
+    // RAIL RPG
+    'Kinetic Breach Tube': { cat:'RAIL RPG',      desc:'Impact; single-use',                                            range:'LONG',    dmg:'1×d12',  attr:'AGI' },
+    'Gauss Launcher':      { cat:'RAIL RPG',      desc:'Kinetic; single-use',                                           range:'LONG',    dmg:'1×d12',  attr:'AGI' },
+    'Mass Driver Tube':    { cat:'RAIL RPG',      desc:'Impact + Kinetic; on hit: save or knocked prone',               range:'LONG',    dmg:'1×d12',  attr:'AGI' },
+    // BIO RPG
+    'Spore Bombard':       { cat:'BIO RPG',       desc:'Corrosive; reduces armor mitigation by 1',                      range:'LONG',    dmg:'1×d12',  attr:'AGI' },
+    'Hive Mortar':         { cat:'BIO RPG',       desc:'+1 die vs wounded targets',                                      range:'LONG',    dmg:'1×d12',  attr:'AGI' },
+    'Brood Obliterator':   { cat:'BIO RPG',       desc:'Shredding; on failed save: poisoned, persists',                 range:'LONG',    dmg:'1×d12',  attr:'AGI' }
+  };
+
+  // Build grouped <option> list and populate all attack selects
+  (function() {
+    var groups = {};
+    Object.keys(WEAPONS).forEach(function(name) {
+      var c = WEAPONS[name].cat;
+      if (!groups[c]) groups[c] = [];
+      groups[c].push(name);
+    });
+    var selects = document.querySelectorAll('.attack-select');
+    selects.forEach(function(sel, idx) {
+      var blank = document.createElement('option');
+      blank.value = ''; blank.textContent = '— SELECT WEAPON —';
+      sel.appendChild(blank);
+      Object.keys(groups).forEach(function(cat) {
+        var og = document.createElement('optgroup');
+        og.label = cat;
+        groups[cat].forEach(function(name) {
+          var opt = document.createElement('option');
+          opt.value = name; opt.textContent = name;
+          og.appendChild(opt);
+        });
+        sel.appendChild(og);
+      });
+      // Pre-select BASH for row 0
+      if (idx === 0) { sel.value = 'BASH'; fillWeapon(sel); }
+    });
+  })();
+
+  function fillWeapon(sel) {
+    var row = sel.closest('.attack-row');
+    var inputs = row.querySelectorAll('input.attack-input');
+    var w = WEAPONS[sel.value];
+    inputs[0].value = w ? w.desc  : '';
+    inputs[1].value = w ? w.range : '';
+    inputs[2].value = w ? w.dmg   : '';
+    // Only auto-fill attr if blank or previously auto-filled
+    if (w && (!inputs[3].dataset.manual || inputs[3].value === inputs[3].dataset.lastAuto)) {
+      inputs[3].value = w.attr;
+      inputs[3].dataset.lastAuto = w.attr;
+    }
+  }
+  // Track manual edits to attr column
+  document.querySelectorAll('.attack-row input:last-child').forEach(function(inp) {
+    inp.addEventListener('input', function() { inp.dataset.manual = '1'; });
+  });
+
   function setTheme(t) {
     document.body.setAttribute('data-theme', t);
     document.getElementById('btn-dark').classList.toggle('active', t === 'dark');
@@ -2656,8 +3255,28 @@
     }
   }
 
+  var CASTE_PASSIVES = {
+    'Royalty':       { name: 'NOBLESSE OBLIGE',      desc: 'Once per rest: invoke noble authority to skip one Aura check or impose disadvantage on an attacker targeting you or an ally.' },
+    'Upper Echelon': { name: 'PROFESSIONAL APTITUDE', desc: 'Once per rest: treat one skill check in your profession\'s domain as if you rolled a 12.' },
+    'Skilled':       { name: 'BROAD COMPETENCY',      desc: 'Once per rest: re-roll any one failed skill check that is not in your profession\'s domain.' },
+    'Unmark':        { name: 'ADAPTIVE DECEPTION',    desc: 'Once per rest: create a false identity or alibi that holds for the rest of the scene without a roll.' }
+  };
+
   casteSelect.addEventListener('change', function() {
     filterProfessions(this.value);
+    var passive = CASTE_PASSIVES[this.value];
+    var plate   = document.getElementById('caste-passive-plate');
+    var nameEl  = document.getElementById('caste-passive-name');
+    var descEl  = document.getElementById('caste-passive-desc');
+    var cbEl    = document.getElementById('caste-passive-cb');
+    if (passive && plate) {
+      nameEl.textContent = passive.name;
+      descEl.textContent = passive.desc;
+      if (cbEl) cbEl.checked = false;
+      plate.style.display = '';
+    } else if (plate) {
+      plate.style.display = 'none';
+    }
   });
 
   profSelect.addEventListener('change', function() {
@@ -2691,10 +3310,18 @@
         + '<span><span class="prof-level-ability-name">' + name + '</span> — ' + desc + '</span>'
         + '</div>';
     }).join('');
+    // Show psionic happenings plate for Mystic / Cultist
+    var psionicPlate = document.getElementById('psionic-plate');
+    if (psionicPlate) psionicPlate.style.display = (['Mystic','Cultist'].indexOf(val) !== -1) ? '' : 'none';
   });
 
   // Sync select values to print inputs before printing
   function syncSelectsForPrint() {
+    var raceSelect  = document.getElementById('race-select');
+    var racePrint   = document.getElementById('race-print');
+    if (raceSelect && racePrint) {
+      racePrint.value = raceSelect.value || '';
+    }
     var casteSelect = document.getElementById('caste-select');
     var castePrint  = document.getElementById('caste-print');
     if (casteSelect && castePrint) {
@@ -2711,6 +3338,46 @@
   // AP pips enabled = floor(AGI / 5)
   var agiInput = document.getElementById('stat-agi');
   var apPips   = document.querySelectorAll('#ap-pips .ap-pip');
+
+  // Derived stats that depend on AGI
+  var derivedInitiative = document.getElementById('derived-initiative');
+  var derivedMovement   = document.getElementById('derived-movement');
+
+  // Derived stats that depend on CUN
+  var cunInput         = document.getElementById('stat-cun');
+  var derivedPsyResist = document.getElementById('derived-psyresist');
+
+  // Derived stats that depend on STR
+  var strInput     = document.getElementById('stat-str');
+  var derivedCarry = document.getElementById('derived-carry');
+
+  // Health = 10 + (VIG × 2) · Stamina = floor(AGI × 2.5) — separate pools
+  var vigInput    = document.getElementById('stat-vig');
+  var healthMax   = document.getElementById('health-max');
+  var staminaMax  = document.getElementById('stamina-max');
+
+  function updateDerived() {
+    var agi = parseInt(agiInput.value, 10) || 0;
+    var cun = parseInt(cunInput.value,  10) || 0;
+    var str = parseInt(strInput.value,  10) || 0;
+    var vig = parseInt(vigInput.value,  10) || 0;
+    derivedInitiative.value = '+' + Math.floor(agi / 5);
+    derivedMovement.value   = (agi + 5) + ' ft';
+    derivedPsyResist.value  = Math.floor(cun / 5) + 'p';
+    derivedCarry.value      = (str * 4) + ' lbs';
+    var hp  = 10 + (vig * 2);
+    var sta = Math.floor(agi * 2.5);
+    healthMax.value  = hp;
+    staminaMax.value = sta;
+    // Preset current to max if not yet manually edited
+    if (!healthMax._edited)  { document.getElementById('health-cur').value  = hp; }
+    if (!staminaMax._edited) { document.getElementById('stamina-cur').value = sta; }
+  }
+
+  // Mark as manually edited once the user touches current fields
+  document.getElementById('health-cur').addEventListener('input',  function() { healthMax._edited  = true; });
+  document.getElementById('stamina-cur').addEventListener('input', function() { staminaMax._edited = true; });
+
   function updateAPPips() {
     var agi = parseInt(agiInput.value, 10);
     var enabled = isNaN(agi) ? 0 : Math.floor(agi / 5);
@@ -2720,8 +3387,536 @@
       if (i >= enabled) pip.checked = false;
     });
   }
-  agiInput.addEventListener('input', updateAPPips);
-  updateAPPips();
+
+  function updateAGI() { updateAPPips(); updateDerived(); }
+
+  agiInput.addEventListener('input', updateAGI);
+  cunInput.addEventListener('input', updateDerived);
+  strInput.addEventListener('input', updateDerived);
+  vigInput.addEventListener('input', updateDerived);
+  updateAGI();
+  updateDerived();
+
+  // ── ARMOR TOTALS ──
+  function updateArmorTotals() {
+    var sels = document.querySelectorAll('.armor-select');
+    var totMit = 0, totDef = 0, totSte = 0, maxTier = 0;
+    sels.forEach(function(sel) {
+      var opt = sel.options[sel.selectedIndex];
+      if (opt && opt.dataset.mit) {
+        totMit += parseInt(opt.dataset.mit, 10) || 0;
+        totDef += parseInt(opt.dataset.def, 10) || 0;
+        totSte += parseInt(opt.dataset.ste, 10) || 0;
+        var t = parseInt(opt.dataset.tier, 10) || 0;
+        if (t > maxTier) maxTier = t;
+      }
+    });
+    var tierNames = ['','I','II','III','IV'];
+    var tierEl = document.getElementById('armor-tier');
+    var mitEl  = document.getElementById('armor-mitigation');
+    var defEl  = document.getElementById('armor-defense');
+    var steEl  = document.getElementById('armor-stealth');
+    if (tierEl) tierEl.value = maxTier > 0 ? 'T' + tierNames[maxTier] : '\u2014';
+    if (mitEl)  mitEl.value  = totMit  || '0';
+    if (defEl)  defEl.value  = (totDef > 0 ? '+' : '') + totDef;
+    if (steEl)  steEl.value  = (totSte > 0 ? '+' : '') + totSte;
+  }
+
+  // ── LEVEL CALC ──
+  function updateLevel() {
+    var attrSum = 0;
+    document.querySelectorAll('.ability-box input').forEach(function(inp) {
+      attrSum += Math.max(0, (parseInt(inp.value, 10) || 10) - 10);
+    });
+    var attrLvl = Math.floor(attrSum / 5);
+    var featLvl = 0;
+    document.querySelectorAll('.feat-input.level').forEach(function(inp) {
+      var v = parseInt(inp.value, 10); if (!isNaN(v) && v > 0) featLvl += v;
+    });
+    var psyLvl = 0;
+    document.querySelectorAll('.psionic-lv').forEach(function(inp) {
+      var v = parseInt(inp.value, 10); if (!isNaN(v) && v > 0) psyLvl += v;
+    });
+    var wpnLvl = 0;
+    document.querySelectorAll('.attack-lv-input').forEach(function(inp) {
+      if (!inp.classList.contains('psionic-lv')) {
+        var v = parseInt(inp.value, 10); if (!isNaN(v) && v > 0) wpnLvl += v;
+      }
+    });
+    var lvlEl = document.getElementById('total-level');
+    if (lvlEl) lvlEl.value = (attrLvl + featLvl + psyLvl + wpnLvl) || '0';
+  }
+
+  document.querySelectorAll('.ability-box input').forEach(function(inp) {
+    inp.addEventListener('input', updateLevel);
+  });
+  document.querySelectorAll('.feat-input.level').forEach(function(inp) {
+    inp.addEventListener('input', updateLevel);
+  });
+  document.querySelectorAll('.attack-lv-input').forEach(function(inp) {
+    inp.addEventListener('input', updateLevel);
+  });
+  updateLevel();
+
+  // Ability point-buy tracker
+  (function() {
+    var BASE = 10, POOL = 6, MAX_RAISE = 5, MAX_LOWER = 3;
+    var abilityInputs = document.querySelectorAll('.ability-box input');
+    var ptsDisplay = document.getElementById('ability-pts-value');
+
+    // Inject custom stepper buttons around each ability input
+    abilityInputs.forEach(function(inp) {
+      var box = inp.parentElement;
+      var wrapper = document.createElement('div');
+      wrapper.className = 'ability-stepper';
+      box.appendChild(wrapper);
+      wrapper.appendChild(inp);
+      var col = document.createElement('div');
+      col.className = 'ability-stepper-col';
+      var btnUp = document.createElement('button');
+      btnUp.type = 'button';
+      btnUp.className = 'ability-stepper-btn';
+      btnUp.textContent = '▲';
+      btnUp.setAttribute('aria-label', 'increase');
+      var btnDown = document.createElement('button');
+      btnDown.type = 'button';
+      btnDown.className = 'ability-stepper-btn';
+      btnDown.textContent = '▼';
+      btnDown.setAttribute('aria-label', 'decrease');
+      col.appendChild(btnUp);
+      col.appendChild(btnDown);
+      box.appendChild(col);
+
+      function refreshButtons() {
+        var v = parseInt(inp.value, 10) || BASE;
+        var remaining = calcRemaining();
+        btnUp.disabled = v >= BASE + MAX_RAISE || remaining <= 0;
+        btnDown.disabled = v <= BASE - MAX_LOWER;
+      }
+
+      btnUp.addEventListener('click', function() {
+        var v = parseInt(inp.value, 10) || BASE;
+        if (v < BASE + MAX_RAISE && calcRemaining() > 0) {
+          inp.value = v + 1;
+          inp.dispatchEvent(new Event('input'));
+        }
+      });
+      btnDown.addEventListener('click', function() {
+        var v = parseInt(inp.value, 10) || BASE;
+        var borrowed = abilityInputs.length > 0
+          ? Array.from(abilityInputs).reduce(function(s, i) { var n = parseInt(i.value,10)||BASE; return s + Math.max(0, BASE-n); }, 0)
+          : 0;
+        if (v > BASE - MAX_LOWER) {
+          inp.value = v - 1;
+          inp.dispatchEvent(new Event('input'));
+        }
+      });
+
+      inp.addEventListener('input', refreshButtons);
+      refreshButtons();
+    });
+
+    function calcRemaining() {
+      var spent = 0, borrowed = 0;
+      abilityInputs.forEach(function(inp) {
+        var v = parseInt(inp.value, 10);
+        if (isNaN(v)) v = BASE;
+        if (v > BASE) spent += v - BASE;
+        else if (v < BASE) borrowed += BASE - v;
+      });
+      return POOL + borrowed - spent;
+    }
+    function updatePointsDisplay() {
+      var remaining = calcRemaining();
+      ptsDisplay.textContent = remaining;
+      ptsDisplay.style.color = remaining === 0 ? 'var(--teal-fed, #47beff)' : 'var(--gold, #d4af37)';
+    }
+    abilityInputs.forEach(function(inp) {
+      inp.addEventListener('input', function() {
+        var v = parseInt(inp.value, 10);
+        if (isNaN(v)) { updatePointsDisplay(); return; }
+        var remaining = calcRemaining();
+        if (remaining < 0) {
+          inp.value = v + remaining;
+        }
+        updatePointsDisplay();
+        // refresh all buttons after any change
+        document.querySelectorAll('.ability-stepper-btn').forEach(function(b) {
+          var parentInp = b.closest('.ability-box').querySelector('input');
+          var pv = parseInt(parentInp.value, 10) || BASE;
+          var rem = calcRemaining();
+          if (b.getAttribute('aria-label') === 'increase') b.disabled = pv >= BASE + MAX_RAISE || rem <= 0;
+          else b.disabled = pv <= BASE - MAX_LOWER;
+        });
+      });
+    });
+    updatePointsDisplay();
+  })();
+
+  // ── PAGE FLIP ──
+  (function() {
+    var onPage2 = false;
+    var p1      = document.querySelector('.passport:not(.sheet-page-2)');
+    var p2      = document.getElementById('sheet-page-2');
+    var btn     = document.getElementById('flip-btn');
+    var arrow   = document.getElementById('flip-arrow');
+    var label   = document.getElementById('flip-label');
+
+    window.flipPage = function() {
+      onPage2 = !onPage2;
+      if (onPage2) {
+        if (p1) p1.style.display = 'none';
+        if (p2) p2.style.display = 'block';
+        arrow.innerHTML = '&#9664;';
+        label.textContent = 'PAGE 1';
+        btn.classList.add('flip-left');
+        window.scrollTo(0, 0);
+      } else {
+        if (p1) p1.style.display = 'block';
+        if (p2) p2.style.display = 'none';
+        arrow.innerHTML = '&#9654;';
+        label.textContent = 'PAGE 2';
+        btn.classList.remove('flip-left');
+        window.scrollTo(0, 0);
+      }
+    };
+  })();
+
+  // ══════════════════════════════════════════════════════
+  // DATALINK — Supabase character save / load
+  // ══════════════════════════════════════════════════════
+  (function() {
+    var SUPA_URL  = 'https://luqpuulrcqoxruibqymr.supabase.co';
+    var SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1cXB1dWxyY3FveHJ1aWJxeW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MDI3OTYsImV4cCI6MjA5MTI3ODc5Nn0.ZSHMt9Jr3t38LbRwjCPpQ2mFuBdX84yRfOE89nw_nXA';
+    var sb = supabase.createClient(SUPA_URL, SUPA_ANON);
+
+    var elStatus      = document.getElementById('dl-status');
+    var elAuthSection = document.getElementById('dl-auth-section');
+    var elActSection  = document.getElementById('dl-actions-section');
+    var elCharSelect  = document.getElementById('dl-char-select');
+    var elLoadBtn     = document.getElementById('dl-load-btn');
+    var elDeleteBtn   = document.getElementById('dl-delete-btn');
+    var elMsg         = document.getElementById('dl-msg');
+
+    var currentUserId   = null;
+    var currentCharId   = null;  // uuid of the loaded/saved character
+
+    // ── helpers ──────────────────────────────────────────
+    function msg(text, isErr) {
+      elMsg.textContent = text;
+      elMsg.className = 'dl-msg' + (isErr ? ' err' : '');
+      if (text) setTimeout(function() { if (elMsg.textContent === text) elMsg.textContent = ''; }, 4000);
+    }
+
+    function setLinked(user) {
+      currentUserId = user ? user.id : null;
+      elStatus.textContent = user ? user.email : 'NOT LINKED';
+      elStatus.className   = 'dl-status' + (user ? ' linked' : '');
+      elAuthSection.style.display  = user ? 'none' : 'flex';
+      elActSection.style.display   = user ? 'flex' : 'none';
+      if (user) loadCharList();
+    }
+
+    // ── collect & restore ────────────────────────────────
+    function v(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+
+    function collectSheetData() {
+      // Feats
+      var feats = [];
+      document.querySelectorAll('.feat-row:not(:first-child)').forEach(function(row) {
+        var ins = row.querySelectorAll('.feat-input');
+        if (ins.length >= 3) feats.push({ attr: ins[0].value, name: ins[1].value, level: ins[2].value });
+      });
+      // Attacks
+      var attacks = [];
+      document.querySelectorAll('.attacks-plate .attack-row:not(:first-child)').forEach(function(row) {
+        var sel = row.querySelector('.attack-select');
+        var ins = row.querySelectorAll('.attack-input');
+        var lv  = row.querySelector('.attack-lv-input');
+        attacks.push({
+          weapon: sel ? sel.value : '',
+          desc:   ins[0] ? ins[0].value : '',
+          range:  ins[1] ? ins[1].value : '',
+          dmg:    ins[2] ? ins[2].value : '',
+          attr:   ins[3] ? ins[3].value : '',
+          lv:     lv  ? lv.value  : ''
+        });
+      });
+      // Psionics
+      var psionics = [];
+      document.querySelectorAll('#psionic-plate .psionic-row:not(:first-child)').forEach(function(row) {
+        var nameIn = row.querySelector('.attack-input');
+        var pips   = Array.from(row.querySelectorAll('.psionic-pip')).map(function(p) { return p.checked; });
+        var attr   = row.querySelector('.etch-select');
+        var lv     = row.querySelector('.psionic-lv');
+        psionics.push({
+          name:  nameIn ? nameIn.value : '',
+          pips:  pips,
+          attr:  attr  ? attr.value  : '',
+          lv:    lv    ? lv.value    : ''
+        });
+      });
+      // Armor slots
+      var armor = Array.from(document.querySelectorAll('.armor-select')).map(function(s) { return s.value; });
+      // Conditions
+      var condEls = document.querySelectorAll('.condition-pip');
+      var conditions = { wounded: false, stunned: false, prone: false, poisoned: false, untethered: false, psy_loud: false };
+      var keys = Object.keys(conditions);
+      condEls.forEach(function(el, i) { if (keys[i]) conditions[keys[i]] = el.checked; });
+      // Action pts
+      var ap = ['ap-1','ap-2','ap-3','ap-4'].map(function(id) { var el = document.getElementById(id); return el ? el.checked : false; });
+      // Bag
+      var bag = Array.from(document.querySelectorAll('.bag-item-input')).map(function(el) { return el.value; });
+      // Credits
+      var credits = '';
+      var credEl = document.querySelector('.credits-input');
+      if (credEl) credits = credEl.value;
+      // Background
+      var background = '';
+      var bgEl = document.querySelector('.bg-textarea');
+      if (bgEl) background = bgEl.value;
+
+      return {
+        name:       document.getElementById('char-name') ? document.getElementById('char-name').value : '',
+        race:       v('race-select'),
+        caste:      v('caste-select'),
+        profession: v('profession-select'),
+        strength:   parseInt(v('stat-str'), 10) || 10,
+        agility:    parseInt(v('stat-agi'), 10) || 10,
+        vigor:      parseInt(v('stat-vig'), 10) || 10,
+        genius:     parseInt(v('stat-gen'), 10) || 10,
+        cunning:    parseInt(v('stat-cun'), 10) || 10,
+        aura:       parseInt(v('stat-aur'), 10) || 10,
+        max_hp:     parseInt(v('health-max'), 10) || 10,
+        current_hp: parseInt(v('health-cur'), 10) || 10,
+        current_stamina: parseInt(v('stamina-cur'), 10) || 0,
+        sheet_data: {
+          action_pts:        ap,
+          conditions:        conditions,
+          caste_passive_used: document.getElementById('caste-passive-cb') ? document.getElementById('caste-passive-cb').checked : false,
+          feats:             feats,
+          attacks:           attacks,
+          psionics:          psionics,
+          armor:             armor,
+          background:        background,
+          credits:           credits,
+          bag:               bag
+        }
+      };
+    }
+
+    function restoreSheetData(char) {
+      function set(id, val) { var el = document.getElementById(id); if (el) el.value = val != null ? val : ''; }
+      function trigger(id) { var el = document.getElementById(id); if (el) el.dispatchEvent(new Event('change')); }
+
+      set('char-name', char.name || '');
+      if (char.race)       { set('race-select',       char.race);       trigger('race-select');       }
+      if (char.caste)      { set('caste-select',      char.caste);      trigger('caste-select');      }
+      if (char.profession) { set('profession-select', char.profession); trigger('profession-select'); }
+      set('stat-str', char.strength || 10);
+      set('stat-agi', char.agility  || 10);
+      set('stat-vig', char.vigor    || 10);
+      set('stat-gen', char.genius   || 10);
+      set('stat-cun', char.cunning  || 10);
+      set('stat-aur', char.aura     || 10);
+      // fire input on all stats so derived stats recalculate
+      ['stat-str','stat-agi','stat-vig','stat-gen','stat-cun','stat-aur'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.dispatchEvent(new Event('input'));
+      });
+      set('health-cur', char.current_hp      || '');
+      set('stamina-cur', char.current_stamina || '');
+
+      var sd = char.sheet_data || {};
+
+      // Action pts
+      if (sd.action_pts) {
+        ['ap-1','ap-2','ap-3','ap-4'].forEach(function(id, i) {
+          var el = document.getElementById(id);
+          if (el) el.checked = !!sd.action_pts[i];
+        });
+      }
+      // Conditions
+      if (sd.conditions) {
+        var condEls = document.querySelectorAll('.condition-pip');
+        var keys = ['wounded','stunned','prone','poisoned','untethered','psy_loud'];
+        condEls.forEach(function(el, i) { if (keys[i]) el.checked = !!sd.conditions[keys[i]]; });
+      }
+      // Caste passive
+      var cpCb = document.getElementById('caste-passive-cb');
+      if (cpCb && sd.caste_passive_used != null) cpCb.checked = !!sd.caste_passive_used;
+      // Feats
+      if (sd.feats) {
+        var featRows = document.querySelectorAll('.feat-row:not(:first-child)');
+        sd.feats.forEach(function(f, i) {
+          if (!featRows[i]) return;
+          var ins = featRows[i].querySelectorAll('.feat-input');
+          if (ins[0]) ins[0].value = f.attr  || '';
+          if (ins[1]) ins[1].value = f.name  || '';
+          if (ins[2]) ins[2].value = f.level || '';
+        });
+      }
+      // Attacks
+      if (sd.attacks) {
+        var atkRows = document.querySelectorAll('.attacks-plate .attack-row:not(:first-child)');
+        sd.attacks.forEach(function(a, i) {
+          if (!atkRows[i]) return;
+          var sel = atkRows[i].querySelector('.attack-select');
+          var ins = atkRows[i].querySelectorAll('.attack-input');
+          var lv  = atkRows[i].querySelector('.attack-lv-input');
+          if (sel) { sel.value = a.weapon || ''; sel.dispatchEvent(new Event('change')); }
+          if (ins[1]) ins[1].value = a.range || '';
+          if (ins[2]) ins[2].value = a.dmg   || '';
+          if (ins[3]) ins[3].value = a.attr  || '';
+          if (lv)     lv.value     = a.lv    || '';
+        });
+      }
+      // Psionics
+      if (sd.psionics) {
+        var psiRows = document.querySelectorAll('#psionic-plate .psionic-row:not(:first-child)');
+        sd.psionics.forEach(function(p, i) {
+          if (!psiRows[i]) return;
+          var nameIn = psiRows[i].querySelector('.attack-input');
+          var pips   = psiRows[i].querySelectorAll('.psionic-pip');
+          var attr   = psiRows[i].querySelector('.etch-select');
+          var lv     = psiRows[i].querySelector('.psionic-lv');
+          if (nameIn) nameIn.value = p.name || '';
+          if (p.pips) pips.forEach(function(pip, j) { pip.checked = !!p.pips[j]; });
+          if (attr)   attr.value   = p.attr || '';
+          if (lv)     lv.value     = p.lv   || '';
+        });
+      }
+      // Armor
+      if (sd.armor) {
+        var armorSels = document.querySelectorAll('.armor-select');
+        sd.armor.forEach(function(val, i) {
+          if (armorSels[i]) { armorSels[i].value = val || ''; }
+        });
+        if (typeof updateArmorTotals === 'function') updateArmorTotals();
+      }
+      // Background
+      var bgEl = document.querySelector('.bg-textarea');
+      if (bgEl && sd.background != null) bgEl.value = sd.background;
+      // Credits
+      var credEl = document.querySelector('.credits-input');
+      if (credEl && sd.credits != null) credEl.value = sd.credits;
+      // Bag
+      if (sd.bag) {
+        var bagEls = document.querySelectorAll('.bag-item-input');
+        sd.bag.forEach(function(val, i) { if (bagEls[i]) bagEls[i].value = val || ''; });
+      }
+      if (typeof updateLevel === 'function') updateLevel();
+    }
+
+    // ── character list ───────────────────────────────────
+    async function loadCharList() {
+      var { data, error } = await sb.from('characters').select('id, name').order('created_at');
+      elCharSelect.innerHTML = '<option value="">— NEW CHARACTER —</option>';
+      currentCharId = null;
+      elLoadBtn.disabled = true;
+      elDeleteBtn.style.display = 'none';
+      if (error) { msg('Error loading characters: ' + error.message, true); return; }
+      (data || []).forEach(function(c) {
+        var opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name || '(unnamed)';
+        if (c.id === currentCharId) opt.selected = true;
+        elCharSelect.appendChild(opt);
+      });
+    }
+
+    window.dlOnCharSelect = function() {
+      var val = elCharSelect.value;
+      currentCharId = val || null;
+      elLoadBtn.disabled = !val;
+      elDeleteBtn.style.display = val ? 'inline-block' : 'none';
+    };
+
+    // ── auth ─────────────────────────────────────────────
+    window.dlSignIn = async function() {
+      var email = document.getElementById('dl-email').value.trim();
+      var pass  = document.getElementById('dl-pass').value;
+      if (!email || !pass) { msg('Enter email and passkey.', true); return; }
+      msg('Linking...');
+      var { data, error } = await sb.auth.signInWithPassword({ email: email, password: pass });
+      if (error) { msg(error.message, true); return; }
+      setLinked(data.user);
+      msg('Linked · ' + data.user.email);
+    };
+
+    window.dlSignOut = async function() {
+      await sb.auth.signOut();
+      setLinked(null);
+      msg('Disconnected.');
+    };
+
+    // ── save ─────────────────────────────────────────────
+    window.dlSave = async function() {
+      if (!currentUserId) { msg('Not linked.', true); return; }
+      var payload = collectSheetData();
+      payload.user_id = currentUserId;
+      if (!payload.name) { msg('Enter a character name first.', true); return; }
+
+      var result;
+      if (currentCharId) {
+        result = await sb.from('characters').update(payload).eq('id', currentCharId).select().single();
+      } else {
+        result = await sb.from('characters').insert(payload).select().single();
+      }
+      if (result.error) { msg('Save failed: ' + result.error.message, true); return; }
+      currentCharId = result.data.id;
+      await loadCharList();
+      // re-select the saved character
+      elCharSelect.value = currentCharId;
+      dlOnCharSelect();
+      msg('Saved · ' + (result.data.name || 'character'));
+    };
+
+    // ── load ─────────────────────────────────────────────
+    window.dlLoad = async function() {
+      if (!currentCharId) return;
+      msg('Loading...');
+      var { data, error } = await sb.from('characters').select('*').eq('id', currentCharId).single();
+      if (error) { msg('Load failed: ' + error.message, true); return; }
+      restoreSheetData(data);
+      msg('Loaded · ' + (data.name || 'character'));
+    };
+
+    // ── delete ───────────────────────────────────────────
+    window.dlDelete = async function() {
+      if (!currentCharId) return;
+      var charName = elCharSelect.options[elCharSelect.selectedIndex].textContent;
+      if (!confirm('Delete "' + charName + '"? This cannot be undone.')) return;
+      var { error } = await sb.from('characters').delete().eq('id', currentCharId);
+      if (error) { msg('Delete failed: ' + error.message, true); return; }
+      currentCharId = null;
+      await loadCharList();
+      msg('Deleted · ' + charName);
+    };
+
+    // ── init: restore session, then auto-load ?id= param ──
+    var urlCharId = new URLSearchParams(window.location.search).get('id');
+
+    sb.auth.getSession().then(function(res) {
+      var session = res.data && res.data.session;
+      setLinked(session ? session.user : null);
+      // If a character id was passed in the URL, select and load it immediately
+      if (urlCharId && session) {
+        currentCharId = urlCharId;
+        // Wait for loadCharList to finish then select + load
+        loadCharList().then(function() {
+          if (elCharSelect) elCharSelect.value = urlCharId;
+          dlOnCharSelect();
+          dlLoad();
+          // Clean the URL so sharing doesn't overwrite edits
+          window.history.replaceState({}, '', window.location.pathname);
+        });
+      }
+    });
+    sb.auth.onAuthStateChange(function(event, session) {
+      setLinked(session ? session.user : null);
+    });
+  })();
 </script>
 </body>
 </html>

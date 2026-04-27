@@ -2579,9 +2579,9 @@
         <h4>The Six Abilities</h4>
         <div class="caste-rule"><strong>Strength</strong> — Physical power, melee force, carrying capacity, and feats of raw endurance.</div>
         <div class="caste-rule"><strong>Agility</strong> — Speed, reflexes, stealth, and ranged accuracy under pressure.</div>
+        <div class="caste-rule"><strong>Vigor</strong> — Resilience, stamina, resistance to pain, and recovery speed.</div>
         <div class="caste-rule"><strong>Genius</strong> — Technical knowledge, problem-solving, hacking, and scientific reasoning.</div>
         <div class="caste-rule"><strong>Cunning</strong> — Deception, perception, strategy, manipulation, and reading situations.</div>
-        <div class="caste-rule"><strong>Vigor</strong> — Resilience, stamina, resistance to pain, and recovery speed.</div>
         <div class="caste-rule"><strong>Aura</strong> — Presence, leadership, persuasion, intimidation, and social authority.</div>
       </div>
       <p style="margin-top:0.75rem;">After assigning base points, apply all bonuses in order: racial bonus first, then caste bonus (if any), then any profession-specified ability bonus. There is no hard cap after creation bonuses are applied.</p>
@@ -2591,9 +2591,12 @@
       <h3>Step 5 — Set Starting Stats</h3>
       <p>Once ability scores are final, calculate your starting statistics:</p>
       <ul>
-        <li><strong>Stamina (HP)</strong> — 10 + (Vigor × 2). This is your hit point pool.</li>
-        <li><strong>Initiative</strong> — Equal to your Agility score. Determines turn order in combat.</li>
-        <li><strong>Carry Capacity</strong> — Strength × 5 units. Exceeding this imposes a −1 penalty to all Agility checks.</li>
+        <li><strong>Health (HP)</strong> — 10 + (Vigor × 2). This is your hit point pool. At baseline Vigor 10 this is 30 HP.</li>
+        <li><strong>Stamina</strong> — floor(Agility × 2.5). A separate exertion pool spent by feats and special abilities. At baseline Agility 10 this is 25. Replenishes fully after a full rest; Health requires medical treatment or a full rest.</li>
+        <li><strong>Initiative</strong> — floor(Agility ÷ 5). Determines turn order in combat. At Agility 10 this is 2.</li>
+        <li><strong>Carry Limit</strong> — Strength × 4 units. Exceeding this imposes a −1 penalty to all Agility checks.</li>
+        <li><strong>Psy Resist</strong> — floor(Cunning ÷ 5). Resistance to Psionic effects and mental attacks.</li>
+        <li><strong>Movement</strong> — Agility + 5 tiles per action in tactical combat.</li>
         <li><strong>Starting Credits</strong> — Roll 2d6 × 50 (Cr). Upper Echelon characters start with an additional 200 Cr.</li>
         <li><strong>Starting Equipment</strong> — All characters begin with light civilian clothing, a personal communicator, and one item from their profession's starting gear list (provided by the GM).</li>
       </ul>
@@ -2606,7 +2609,7 @@
       <div class="caste-card upper" style="margin-top:0.75rem;">
         <h4>How Feats Are Rolled</h4>
         <div class="caste-rule">When you invoke a feat, roll <strong>1d6 (exploding)</strong> and add your <strong>ability modifier</strong> for the assigned ability. An exploding d6 is re-rolled and added again whenever the maximum face (6) is rolled — this can chain indefinitely.</div>
-        <div class="caste-rule">Your <strong>ability modifier</strong> equals the ability score itself (e.g. Strength 3 = +3). There is no separate modifier table.</div>
+        <div class="caste-rule">Your <strong>ability modifier</strong> is <strong>+1 for every 2 points above 10</strong>, and <strong>−1 for every 2 points below 10</strong>. Odd-point differences round down toward zero. (Score 10 = ±0 · 12 = +1 · 14 = +2 · 8 = −1 · 6 = −2)</div>
         <div class="caste-rule">The GM sets a difficulty threshold for the feat. Meeting or exceeding it is a success; exceeding it by 4 or more is a <strong>critical success</strong>.</div>
       </div>
 
@@ -2672,7 +2675,7 @@
         <li>Select a Caste → Record passive caste mechanic.</li>
         <li>Pick a Profession → Record profession bonus and Level 1 ability.</li>
         <li>Assign 6 points across the six ability scores (max +5 to any one).</li>
-        <li>Calculate Stamina, Initiative, Carry Capacity, and Starting Credits.</li>
+        <li>Calculate Health, Stamina, Initiative, Carry Limit, Psy Resist, Movement, and Starting Credits.</li>
         <li>Choose 3 Feats → Assign each to an ability score.</li>
       </ol>
       <p>Once complete, give your character a name, background notes, and a motivation. Bring them to the table ready to explore the Age of the Trade Expanse.</p>
@@ -2700,7 +2703,7 @@
 
     <div class="rule-block">
       <h5>Hit Points</h5>
-      <p>All characters start with <strong>50 HP</strong>. Armor mitigates damage before HP loss. If HP drops below 25, the character becomes <strong>Wounded</strong>. Wounded characters will die without medical help.</p>
+      <p>Health = 10 + (Vigor × 2). At baseline Vigor 10 this is 30 HP. Armor mitigates damage before HP loss. If HP drops below half of maximum, the character becomes <strong>Wounded</strong>. Wounded characters will die without medical help.</p>
     </div>
 
     <!-- AUTHORITY -->
@@ -2905,6 +2908,22 @@
       <p>Rail weapons require ammunition. Laser and Bio weapons do not. Specific ammo types are listed per weapon entry.</p>
     </div>
 
+    <div class="rule-block">
+      <h5>Range Bands</h5>
+      <p>Ranged attacks are only possible if the target is within the weapon's range band. Attacking at the outer edge of a range band imposes no penalty unless otherwise stated.</p>
+      <table class="stat-table" style="margin-top:0.6rem;">
+        <thead><tr><th>Band</th><th>Distance</th><th>Typical Weapons</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Melee</strong></td><td>Touch / 5 ft</td><td>Vibroblades, Short Swords, Electric Pikes, Bio-Melee</td></tr>
+          <tr><td><strong>Short</strong></td><td>Up to 100 ft</td><td>Pistols (Laser, Rail, Bio)</td></tr>
+          <tr><td><strong>Medium</strong></td><td>Up to 500 ft</td><td>Small Arms (Laser, Rail, Bio)</td></tr>
+          <tr><td><strong>Long</strong></td><td>Up to 1,000 ft</td><td>Rifles (Laser, Rail, Bio), RPGs (Laser, Rail, Bio)</td></tr>
+          <tr><td><strong>Extreme</strong></td><td>Up to 3,000 ft — line of sight</td><td>Sniper weapons (Laser, Rail, Bio)</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:0.5rem;font-size:0.85em;color:var(--text-dim);">Laser Sniper weapons can engage any target within line of sight, up to 3,000 ft.</p>
+    </div>
+
     <h3 class="section-title" id="damage-effects">Damage Effects</h3>
     <p>Every weapon produces a specific type of damage. The effect determines how that damage interacts with armor, environments, and enemy traits.</p>
 
@@ -2937,11 +2956,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Vibroblade</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>VB-11 Whisperblade</td><td>Very Small</td><td>2×d4</td><td>2</td><td>500 cr</td><td class="rarity-common">Common</td><td><span class="dmg-badge dmg-energy">Energy</span></td><td>Silent; on crit: target loses next reaction</td><td>Jammed Servo</td></tr>
-          <tr><td>VB-27 Duelist Edge</td><td>Small</td><td>2×d6</td><td>2</td><td>1,000 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-energy">Energy</span> <span class="dmg-badge dmg-impact">Impact</span></td><td>Shredding; on hit: STR save or pushed 5 ft</td><td>Power Cell Flicker</td></tr>
-          <tr><td>VB-90 Titan Cutter</td><td>Large</td><td>1×d10</td><td>1</td><td>5,000 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-impact">Impact</span></td><td>Armor-Piercing; on hit: STR save or knocked prone</td><td>Jammed Servo</td></tr>
+          <tr><td>VB-11 Whisperblade</td><td>Very Small</td><td>Melee</td><td>2×d4</td><td>2</td><td>500 cr</td><td class="rarity-common">Common</td><td><span class="dmg-badge dmg-energy">Energy</span></td><td>Silent; on crit: target loses next reaction</td><td>Jammed Servo</td></tr>
+          <tr><td>VB-27 Duelist Edge</td><td>Small</td><td>Melee</td><td>2×d6</td><td>2</td><td>1,000 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-energy">Energy</span> <span class="dmg-badge dmg-impact">Impact</span></td><td>Shredding; on hit: STR save or pushed 5 ft</td><td>Power Cell Flicker</td></tr>
+          <tr><td>VB-90 Titan Cutter</td><td>Large</td><td>Melee</td><td>1×d10</td><td>1</td><td>5,000 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-impact">Impact</span></td><td>Armor-Piercing; on hit: STR save or knocked prone</td><td>Jammed Servo</td></tr>
         </tbody>
       </table>
     </div>
@@ -2949,11 +2968,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Short Sword</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>VSS-3 Quickfang</td><td>Small</td><td>2×d6</td><td>2</td><td>1,000 cr</td><td class="rarity-common">Common</td><td><span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Silent; on crit: +1 attack die</td><td>Jammed Servo</td></tr>
-          <tr><td>VSS-12 Linebreaker</td><td>Medium</td><td>1×d8</td><td>1</td><td>2,500 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-impact">Impact</span></td><td>Staggering; on hit: target knocked back 5 ft</td><td>Power Cell Flicker</td></tr>
-          <tr><td>VSS-44 Executioner</td><td>Large</td><td>1×d10</td><td>1</td><td>5,000 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-temperature">Temperature</span></td><td>Armor-Piercing; on roll of 6: bypass armor</td><td>Jammed Servo</td></tr>
+          <tr><td>VSS-3 Quickfang</td><td>Small</td><td>Melee</td><td>2×d6</td><td>2</td><td>1,000 cr</td><td class="rarity-common">Common</td><td><span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Silent; on crit: +1 attack die</td><td>Jammed Servo</td></tr>
+          <tr><td>VSS-12 Linebreaker</td><td>Medium</td><td>Melee</td><td>1×d8</td><td>1</td><td>2,500 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-impact">Impact</span></td><td>Staggering; on hit: target knocked back 5 ft</td><td>Power Cell Flicker</td></tr>
+          <tr><td>VSS-44 Executioner</td><td>Large</td><td>Melee</td><td>1×d10</td><td>1</td><td>5,000 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-temperature">Temperature</span></td><td>Armor-Piercing; on roll of 6: bypass armor</td><td>Jammed Servo</td></tr>
         </tbody>
       </table>
     </div>
@@ -2961,11 +2980,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Electric Pike</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>EP-5 Shocklance</td><td>Medium</td><td>1×d8</td><td>1</td><td>2,500 cr</td><td class="rarity-common">Common</td><td><span class="dmg-badge dmg-energy">Energy</span></td><td>Staggering; on crit: target loses next reaction</td><td>Power Cell Flicker</td></tr>
-          <tr><td>EP-19 Arc-Pike</td><td>Large</td><td>1×d10</td><td>1</td><td>5,000 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-temperature">Temperature</span></td><td>Overcharge; on roll of 6: bypass armor</td><td>Heat Sink Overload</td></tr>
-          <tr><td>EP-72 Thunder Halberd</td><td>Very Large</td><td>1×d12</td><td>1</td><td>10,000 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-impact">Impact</span> <span class="dmg-badge dmg-energy">Energy</span></td><td>Staggering; on hit: save or knocked back 5 ft</td><td>Beam Scatter</td></tr>
+          <tr><td>EP-5 Shocklance</td><td>Medium</td><td>Melee</td><td>1×d8</td><td>1</td><td>2,500 cr</td><td class="rarity-common">Common</td><td><span class="dmg-badge dmg-energy">Energy</span></td><td>Staggering; on crit: target loses next reaction</td><td>Power Cell Flicker</td></tr>
+          <tr><td>EP-19 Arc-Pike</td><td>Large</td><td>Melee</td><td>1×d10</td><td>1</td><td>5,000 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-temperature">Temperature</span></td><td>Overcharge; on roll of 6: bypass armor</td><td>Heat Sink Overload</td></tr>
+          <tr><td>EP-72 Thunder Halberd</td><td>Very Large</td><td>Melee</td><td>1×d12</td><td>1</td><td>10,000 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-impact">Impact</span> <span class="dmg-badge dmg-energy">Energy</span></td><td>Staggering; on hit: save or knocked back 5 ft</td><td>Beam Scatter</td></tr>
         </tbody>
       </table>
     </div>
@@ -2973,11 +2992,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Bio-Melee</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Razorling</td><td>Very Small</td><td>2×d4</td><td>2</td><td>875 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-bioadaptive">Bio-Adaptive</span></td><td>+1 die vs wounded targets</td><td>Spore Backlash</td></tr>
-          <tr><td>Tendril Lash</td><td>Small</td><td>2×d6</td><td>2</td><td>1,750 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-poison">Poison</span></td><td>Corrosive; on failed save: poisoned, persists</td><td>Growth Seizure</td></tr>
-          <tr><td>Crushbeast Maul</td><td>Very Large</td><td>1×d12</td><td>1</td><td>17,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-acidic">Acidic</span></td><td>Staggering; reduces armor mitigation by 1</td><td>Spore Backlash</td></tr>
+          <tr><td>Razorling</td><td>Very Small</td><td>Melee</td><td>2×d4</td><td>2</td><td>875 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-bioadaptive">Bio-Adaptive</span></td><td>+1 die vs wounded targets</td><td>Spore Backlash</td></tr>
+          <tr><td>Tendril Lash</td><td>Small</td><td>Melee</td><td>2×d6</td><td>2</td><td>1,750 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-poison">Poison</span></td><td>Corrosive; on failed save: poisoned, persists</td><td>Growth Seizure</td></tr>
+          <tr><td>Crushbeast Maul</td><td>Very Large</td><td>Melee</td><td>1×d12</td><td>1</td><td>17,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-acidic">Acidic</span></td><td>Staggering; reduces armor mitigation by 1</td><td>Spore Backlash</td></tr>
         </tbody>
       </table>
     </div>
@@ -2988,11 +3007,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Laser Pistol</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Needlebeam</td><td>Very Small</td><td>2×d4</td><td>2</td><td>625 cr</td><td class="rarity-common">Common</td><td><span class="dmg-badge dmg-energy">Energy</span></td><td>Silent; on crit: lose next reaction</td><td>Beam Scatter</td></tr>
-          <tr><td>Starflare</td><td>Small</td><td>2×d6</td><td>2</td><td>1,250 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-temperature">Temperature</span></td><td>Overcharge; on roll of 6: bypass armor</td><td>Heat Sink Overload</td></tr>
-          <tr><td>Sunburst</td><td>Medium</td><td>1×d8</td><td>1</td><td>3,125 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-temperature">Temperature</span> <span class="dmg-badge dmg-energy">Energy</span></td><td>Armor-Piercing; on 6: bypass; on crit: lose reaction</td><td>Beam Scatter</td></tr>
+          <tr><td>Needlebeam</td><td>Very Small</td><td>Short</td><td>2×d4</td><td>2</td><td>625 cr</td><td class="rarity-common">Common</td><td><span class="dmg-badge dmg-energy">Energy</span></td><td>Silent; on crit: lose next reaction</td><td>Beam Scatter</td></tr>
+          <tr><td>Starflare</td><td>Small</td><td>Short</td><td>2×d6</td><td>2</td><td>1,250 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-temperature">Temperature</span></td><td>Overcharge; on roll of 6: bypass armor</td><td>Heat Sink Overload</td></tr>
+          <tr><td>Sunburst</td><td>Medium</td><td>Short</td><td>1×d8</td><td>1</td><td>3,125 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-temperature">Temperature</span> <span class="dmg-badge dmg-energy">Energy</span></td><td>Armor-Piercing; on 6: bypass; on crit: lose reaction</td><td>Beam Scatter</td></tr>
         </tbody>
       </table>
     </div>
@@ -3000,11 +3019,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Rail Pistol — Requires Ammunition: Micro-Slug Clip (10 shots)</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Micro-Slug</td><td>Very Small</td><td>2×d4</td><td>2</td><td>750 cr</td><td class="rarity-common">Common</td><td><span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Armor-Piercing; on crit: +1 attack die</td><td>Magnetic Jam</td></tr>
-          <tr><td>Kinetic Sidearm</td><td>Small</td><td>2×d6</td><td>2</td><td>1,500 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-impact">Impact</span></td><td>Shredding; on hit: STR save or pushed 5 ft</td><td>Coil Warp</td></tr>
-          <tr><td>Thunderbolt Compact</td><td>Medium</td><td>1×d8</td><td>1</td><td>3,750 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-impact">Impact</span> <span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Staggering; on hit: save or knocked prone</td><td>Magnetic Jam</td></tr>
+          <tr><td>Micro-Slug</td><td>Very Small</td><td>Short</td><td>2×d4</td><td>2</td><td>750 cr</td><td class="rarity-common">Common</td><td><span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Armor-Piercing; on crit: +1 attack die</td><td>Magnetic Jam</td></tr>
+          <tr><td>Kinetic Sidearm</td><td>Small</td><td>Short</td><td>2×d6</td><td>2</td><td>1,500 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-impact">Impact</span></td><td>Shredding; on hit: STR save or pushed 5 ft</td><td>Coil Warp</td></tr>
+          <tr><td>Thunderbolt Compact</td><td>Medium</td><td>Short</td><td>1×d8</td><td>1</td><td>3,750 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-impact">Impact</span> <span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Staggering; on hit: save or knocked prone</td><td>Magnetic Jam</td></tr>
         </tbody>
       </table>
     </div>
@@ -3012,11 +3031,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Bio Pistol</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Gnatburst</td><td>Very Small</td><td>2×d4</td><td>2</td><td>875 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-bioadaptive">Bio-Adaptive</span></td><td>+1 die vs wounded targets</td><td>Spore Backlash</td></tr>
-          <tr><td>Venomshot</td><td>Small</td><td>2×d6</td><td>2</td><td>1,750 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-poison">Poison</span></td><td>Corrosive; on failed save: poisoned, persists</td><td>Growth Seizure</td></tr>
-          <tr><td>Hiveburst</td><td>Medium</td><td>1×d8</td><td>1</td><td>4,375 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-acidic">Acidic</span></td><td>Shredding; reduces armor mitigation by 1</td><td>Spore Backlash</td></tr>
+          <tr><td>Gnatburst</td><td>Very Small</td><td>Short</td><td>2×d4</td><td>2</td><td>875 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-bioadaptive">Bio-Adaptive</span></td><td>+1 die vs wounded targets</td><td>Spore Backlash</td></tr>
+          <tr><td>Venomshot</td><td>Small</td><td>Short</td><td>2×d6</td><td>2</td><td>1,750 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-poison">Poison</span></td><td>Corrosive; on failed save: poisoned, persists</td><td>Growth Seizure</td></tr>
+          <tr><td>Hiveburst</td><td>Medium</td><td>Short</td><td>1×d8</td><td>1</td><td>4,375 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-acidic">Acidic</span></td><td>Shredding; reduces armor mitigation by 1</td><td>Spore Backlash</td></tr>
         </tbody>
       </table>
     </div>
@@ -3027,11 +3046,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Laser Small Arm</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Flashcarbine</td><td>Small</td><td>2×d6</td><td>2</td><td>1,250 cr</td><td class="rarity-common">Common</td><td><span class="dmg-badge dmg-energy">Energy</span></td><td>Silent; on crit: lose next reaction</td><td>Beam Scatter</td></tr>
-          <tr><td>Beam Carbine</td><td>Medium</td><td>1×d8</td><td>1</td><td>3,125 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-temperature">Temperature</span></td><td>Overcharge; on roll of 6: bypass armor</td><td>Heat Sink Overload</td></tr>
-          <tr><td>Pulse Repeater</td><td>Large</td><td>1×d10</td><td>1</td><td>6,250 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-temperature">Temperature</span> <span class="dmg-badge dmg-energy">Energy</span></td><td>Armor-Piercing; on 6: bypass; on crit: lose reaction</td><td>Beam Scatter</td></tr>
+          <tr><td>Flashcarbine</td><td>Small</td><td>Medium</td><td>2×d6</td><td>2</td><td>1,250 cr</td><td class="rarity-common">Common</td><td><span class="dmg-badge dmg-energy">Energy</span></td><td>Silent; on crit: lose next reaction</td><td>Beam Scatter</td></tr>
+          <tr><td>Beam Carbine</td><td>Medium</td><td>Medium</td><td>1×d8</td><td>1</td><td>3,125 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-temperature">Temperature</span></td><td>Overcharge; on roll of 6: bypass armor</td><td>Heat Sink Overload</td></tr>
+          <tr><td>Pulse Repeater</td><td>Large</td><td>Medium</td><td>1×d10</td><td>1</td><td>6,250 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-temperature">Temperature</span> <span class="dmg-badge dmg-energy">Energy</span></td><td>Armor-Piercing; on 6: bypass; on crit: lose reaction</td><td>Beam Scatter</td></tr>
         </tbody>
       </table>
     </div>
@@ -3039,11 +3058,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Rail Small Arm — Requires Ammunition</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Ammo</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Ammo</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Micro-Rail Carbine</td><td>Small</td><td>2×d6</td><td>2</td><td>1,500 cr</td><td class="rarity-common">Common</td><td><span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Rail Carbine Mag (20)</td><td>Magnetic Jam</td></tr>
-          <tr><td>Gauss Carbine</td><td>Medium</td><td>1×d8</td><td>1</td><td>3,750 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-impact">Impact</span></td><td>Gauss Carbine Mag (20)</td><td>Coil Warp</td></tr>
-          <tr><td>Storm Repeater</td><td>Large</td><td>1×d10</td><td>1</td><td>7,500 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-impact">Impact</span> <span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Gauss Carbine Mag (20)</td><td>Magnetic Jam</td></tr>
+          <tr><td>Micro-Rail Carbine</td><td>Small</td><td>Medium</td><td>2×d6</td><td>2</td><td>1,500 cr</td><td class="rarity-common">Common</td><td><span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Rail Carbine Mag (20)</td><td>Magnetic Jam</td></tr>
+          <tr><td>Gauss Carbine</td><td>Medium</td><td>Medium</td><td>1×d8</td><td>1</td><td>3,750 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-impact">Impact</span></td><td>Gauss Carbine Mag (20)</td><td>Coil Warp</td></tr>
+          <tr><td>Storm Repeater</td><td>Large</td><td>Medium</td><td>1×d10</td><td>1</td><td>7,500 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-impact">Impact</span> <span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Gauss Carbine Mag (20)</td><td>Magnetic Jam</td></tr>
         </tbody>
       </table>
     </div>
@@ -3051,11 +3070,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Bio Small Arm</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Sporecaster</td><td>Small</td><td>2×d6</td><td>2</td><td>1,750 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-acidic">Acidic</span></td><td>Corrosive; reduces armor mitigation by 1</td><td>Spore Backlash</td></tr>
-          <tr><td>Mycelium Spitter</td><td>Medium</td><td>1×d8</td><td>1</td><td>4,375 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-poison">Poison</span></td><td>Bio-Adaptive; on failed save: poisoned, persists</td><td>Growth Seizure</td></tr>
-          <tr><td>Broodburst</td><td>Large</td><td>1×d10</td><td>1</td><td>8,750 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-bioadaptive">Bio-Adaptive</span></td><td>Shredding; +1 die vs wounded targets</td><td>Spore Backlash</td></tr>
+          <tr><td>Sporecaster</td><td>Small</td><td>Medium</td><td>2×d6</td><td>2</td><td>1,750 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-acidic">Acidic</span></td><td>Corrosive; reduces armor mitigation by 1</td><td>Spore Backlash</td></tr>
+          <tr><td>Mycelium Spitter</td><td>Medium</td><td>Medium</td><td>1×d8</td><td>1</td><td>4,375 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-poison">Poison</span></td><td>Bio-Adaptive; on failed save: poisoned, persists</td><td>Growth Seizure</td></tr>
+          <tr><td>Broodburst</td><td>Large</td><td>Medium</td><td>1×d10</td><td>1</td><td>8,750 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-bioadaptive">Bio-Adaptive</span></td><td>Shredding; +1 die vs wounded targets</td><td>Spore Backlash</td></tr>
         </tbody>
       </table>
     </div>
@@ -3066,11 +3085,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Laser Rifle</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Pinpoint Beam Rifle</td><td>Medium</td><td>1×d8</td><td>1</td><td>3,125 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-energy">Energy</span></td><td>Silent; on crit: lose next reaction</td><td>Beam Scatter</td></tr>
-          <tr><td>Pulse Rifle</td><td>Large</td><td>1×d10</td><td>1</td><td>6,250 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-temperature">Temperature</span></td><td>Overcharge; on roll of 6: bypass armor</td><td>Heat Sink Overload</td></tr>
-          <tr><td>Starbreaker</td><td>Very Large</td><td>1×d12</td><td>1</td><td>12,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-temperature">Temperature</span> <span class="dmg-badge dmg-energy">Energy</span></td><td>Armor-Piercing; on 6: bypass; on crit: lose reaction</td><td>Beam Scatter</td></tr>
+          <tr><td>Pinpoint Beam Rifle</td><td>Medium</td><td>Long</td><td>1×d8</td><td>1</td><td>3,125 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-energy">Energy</span></td><td>Silent; on crit: lose next reaction</td><td>Beam Scatter</td></tr>
+          <tr><td>Pulse Rifle</td><td>Large</td><td>Long</td><td>1×d10</td><td>1</td><td>6,250 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-temperature">Temperature</span></td><td>Overcharge; on roll of 6: bypass armor</td><td>Heat Sink Overload</td></tr>
+          <tr><td>Starbreaker</td><td>Very Large</td><td>Long</td><td>1×d12</td><td>1</td><td>12,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-temperature">Temperature</span> <span class="dmg-badge dmg-energy">Energy</span></td><td>Armor-Piercing; on 6: bypass; on crit: lose reaction</td><td>Beam Scatter</td></tr>
         </tbody>
       </table>
     </div>
@@ -3078,11 +3097,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Rail Rifle — Requires Ammunition</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Ammo</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Ammo</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Needle Railgun</td><td>Medium</td><td>1×d8</td><td>1</td><td>3,750 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Gauss Rifle Mag (15)</td><td>Coil Warp</td></tr>
-          <tr><td>Gauss Rifle</td><td>Large</td><td>1×d10</td><td>1</td><td>7,500 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-impact">Impact</span></td><td>Gauss Rifle Mag (15)</td><td>Magnetic Jam</td></tr>
-          <tr><td>Titan Rail Cannon</td><td>Very Large</td><td>1×d12</td><td>1</td><td>15,000 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-impact">Impact</span> <span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Titan Rail Slug (single)</td><td>Coil Warp</td></tr>
+          <tr><td>Needle Railgun</td><td>Medium</td><td>Long</td><td>1×d8</td><td>1</td><td>3,750 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Gauss Rifle Mag (15)</td><td>Coil Warp</td></tr>
+          <tr><td>Gauss Rifle</td><td>Large</td><td>Long</td><td>1×d10</td><td>1</td><td>7,500 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-impact">Impact</span></td><td>Gauss Rifle Mag (15)</td><td>Magnetic Jam</td></tr>
+          <tr><td>Titan Rail Cannon</td><td>Very Large</td><td>Long</td><td>1×d12</td><td>1</td><td>15,000 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-impact">Impact</span> <span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Titan Rail Slug (single)</td><td>Coil Warp</td></tr>
         </tbody>
       </table>
     </div>
@@ -3090,11 +3109,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Bio Rifle</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Spinecaster</td><td>Medium</td><td>1×d8</td><td>1</td><td>4,375 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-bioadaptive">Bio-Adaptive</span></td><td>+1 die vs wounded targets</td><td>Growth Seizure</td></tr>
-          <tr><td>Acid Maw</td><td>Large</td><td>1×d10</td><td>1</td><td>8,750 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-acidic">Acidic</span></td><td>Corrosive; reduces armor mitigation by 1</td><td>Spore Backlash</td></tr>
-          <tr><td>Hive Piercer</td><td>Very Large</td><td>1×d12</td><td>1</td><td>17,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-poison">Poison</span></td><td>Shredding; on failed save: poisoned, persists</td><td>Growth Seizure</td></tr>
+          <tr><td>Spinecaster</td><td>Medium</td><td>Long</td><td>1×d8</td><td>1</td><td>4,375 cr</td><td class="rarity-uncommon">Uncommon</td><td><span class="dmg-badge dmg-bioadaptive">Bio-Adaptive</span></td><td>+1 die vs wounded targets</td><td>Growth Seizure</td></tr>
+          <tr><td>Acid Maw</td><td>Large</td><td>Long</td><td>1×d10</td><td>1</td><td>8,750 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-acidic">Acidic</span></td><td>Corrosive; reduces armor mitigation by 1</td><td>Spore Backlash</td></tr>
+          <tr><td>Hive Piercer</td><td>Very Large</td><td>Long</td><td>1×d12</td><td>1</td><td>17,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-poison">Poison</span></td><td>Shredding; on failed save: poisoned, persists</td><td>Growth Seizure</td></tr>
         </tbody>
       </table>
     </div>
@@ -3105,11 +3124,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Laser Sniper</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Ghostbeam</td><td>Large</td><td>1×d10</td><td>1</td><td>6,250 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-energy">Energy</span></td><td>Silent; on crit: lose next reaction</td><td>Beam Scatter</td></tr>
-          <tr><td>Horizon Lance</td><td>Very Large</td><td>1×d12</td><td>1</td><td>12,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-temperature">Temperature</span></td><td>Armor-Piercing; on roll of 6: bypass armor</td><td>Heat Sink Overload</td></tr>
-          <tr><td>Star-Spear</td><td>Very Large</td><td>1×d12</td><td>1</td><td>12,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-temperature">Temperature</span> <span class="dmg-badge dmg-energy">Energy</span></td><td>Overcharge; on 6: bypass; on crit: lose reaction</td><td>Beam Scatter</td></tr>
+          <tr><td>Ghostbeam</td><td>Large</td><td>Extreme</td><td>1×d10</td><td>1</td><td>6,250 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-energy">Energy</span></td><td>Silent; on crit: lose next reaction</td><td>Beam Scatter</td></tr>
+          <tr><td>Horizon Lance</td><td>Very Large</td><td>Extreme</td><td>1×d12</td><td>1</td><td>12,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-temperature">Temperature</span></td><td>Armor-Piercing; on roll of 6: bypass armor</td><td>Heat Sink Overload</td></tr>
+          <tr><td>Star-Spear</td><td>Very Large</td><td>Extreme</td><td>1×d12</td><td>1</td><td>12,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-temperature">Temperature</span> <span class="dmg-badge dmg-energy">Energy</span></td><td>Overcharge; on 6: bypass; on crit: lose reaction</td><td>Beam Scatter</td></tr>
         </tbody>
       </table>
     </div>
@@ -3117,11 +3136,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Rail Sniper — Requires Ammunition</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Ammo</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Ammo</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Micro-Gauss Sniper</td><td>Large</td><td>1×d10</td><td>1</td><td>7,500 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Sniper Rail Slug (single)</td><td>Coil Warp</td></tr>
-          <tr><td>Long-Slug Rifle</td><td>Very Large</td><td>1×d12</td><td>1</td><td>15,000 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-impact">Impact</span></td><td>Sniper Rail Slug (single)</td><td>Magnetic Jam</td></tr>
-          <tr><td>Planet Cracker</td><td>Very Large</td><td>1×d12</td><td>1</td><td>15,000 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-impact">Impact</span> <span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Heavy Rail Slug (single)</td><td>Coil Warp</td></tr>
+          <tr><td>Micro-Gauss Sniper</td><td>Large</td><td>Extreme</td><td>1×d10</td><td>1</td><td>7,500 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Sniper Rail Slug (single)</td><td>Coil Warp</td></tr>
+          <tr><td>Long-Slug Rifle</td><td>Very Large</td><td>Extreme</td><td>1×d12</td><td>1</td><td>15,000 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-impact">Impact</span></td><td>Sniper Rail Slug (single)</td><td>Magnetic Jam</td></tr>
+          <tr><td>Planet Cracker</td><td>Very Large</td><td>Extreme</td><td>1×d12</td><td>1</td><td>15,000 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-impact">Impact</span> <span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Heavy Rail Slug (single)</td><td>Coil Warp</td></tr>
         </tbody>
       </table>
     </div>
@@ -3129,11 +3148,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Bio Sniper</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Needle Wyrm</td><td>Large</td><td>1×d10</td><td>1</td><td>8,750 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-bioadaptive">Bio-Adaptive</span></td><td>+1 die vs wounded targets</td><td>Spore Backlash</td></tr>
-          <tr><td>Piercing Maw</td><td>Very Large</td><td>1×d12</td><td>1</td><td>17,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-acidic">Acidic</span></td><td>Corrosive; reduces armor mitigation by 1</td><td>Growth Seizure</td></tr>
-          <tr><td>Colossus Fang</td><td>Very Large</td><td>1×d12</td><td>1</td><td>17,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-poison">Poison</span></td><td>Shredding; on failed save: poisoned, persists</td><td>Spore Backlash</td></tr>
+          <tr><td>Needle Wyrm</td><td>Large</td><td>Extreme</td><td>1×d10</td><td>1</td><td>8,750 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-bioadaptive">Bio-Adaptive</span></td><td>+1 die vs wounded targets</td><td>Spore Backlash</td></tr>
+          <tr><td>Piercing Maw</td><td>Very Large</td><td>Extreme</td><td>1×d12</td><td>1</td><td>17,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-acidic">Acidic</span></td><td>Corrosive; reduces armor mitigation by 1</td><td>Growth Seizure</td></tr>
+          <tr><td>Colossus Fang</td><td>Very Large</td><td>Extreme</td><td>1×d12</td><td>1</td><td>17,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-poison">Poison</span></td><td>Shredding; on failed save: poisoned, persists</td><td>Spore Backlash</td></tr>
         </tbody>
       </table>
     </div>
@@ -3144,11 +3163,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Laser RPG</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Beam Breacher</td><td>Very Large</td><td>1×d12</td><td>1</td><td>12,500 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-temperature">Temperature</span></td><td>Armor-Piercing; on roll of 6: bypass armor</td><td>Heat Sink Overload</td></tr>
-          <tr><td>Siege Lance</td><td>Very Large</td><td>1×d12</td><td>1</td><td>12,500 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-energy">Energy</span></td><td>Overcharge; on crit: target loses next reaction</td><td>Beam Scatter</td></tr>
-          <tr><td>Star-Hammer</td><td>Very Large</td><td>1×d12</td><td>1</td><td>12,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-temperature">Temperature</span> <span class="dmg-badge dmg-energy">Energy</span></td><td>Staggering; on 6: bypass; on crit: lose reaction</td><td>Heat Sink Overload</td></tr>
+          <tr><td>Beam Breacher</td><td>Very Large</td><td>Long</td><td>1×d12</td><td>1</td><td>12,500 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-temperature">Temperature</span></td><td>Armor-Piercing; on roll of 6: bypass armor</td><td>Heat Sink Overload</td></tr>
+          <tr><td>Siege Lance</td><td>Very Large</td><td>Long</td><td>1×d12</td><td>1</td><td>12,500 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-energy">Energy</span></td><td>Overcharge; on crit: target loses next reaction</td><td>Beam Scatter</td></tr>
+          <tr><td>Star-Hammer</td><td>Very Large</td><td>Long</td><td>1×d12</td><td>1</td><td>12,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-temperature">Temperature</span> <span class="dmg-badge dmg-energy">Energy</span></td><td>Staggering; on 6: bypass; on crit: lose reaction</td><td>Heat Sink Overload</td></tr>
         </tbody>
       </table>
     </div>
@@ -3156,11 +3175,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Rail RPG — Requires Ammunition (single-use)</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Ammo</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Ammo</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Kinetic Breach Tube</td><td>Very Large</td><td>1×d12</td><td>1</td><td>15,000 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-impact">Impact</span></td><td>Mass Driver Rail</td><td>Magnetic Jam</td></tr>
-          <tr><td>Gauss Launcher</td><td>Very Large</td><td>1×d12</td><td>1</td><td>15,000 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Gauss Heavy Rail</td><td>Coil Warp</td></tr>
-          <tr><td>Mass Driver Tube</td><td>Very Large</td><td>1×d12</td><td>1</td><td>15,000 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-impact">Impact</span> <span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Mass Driver Rail</td><td>Magnetic Jam</td></tr>
+          <tr><td>Kinetic Breach Tube</td><td>Very Large</td><td>Long</td><td>1×d12</td><td>1</td><td>15,000 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-impact">Impact</span></td><td>Mass Driver Rail</td><td>Magnetic Jam</td></tr>
+          <tr><td>Gauss Launcher</td><td>Very Large</td><td>Long</td><td>1×d12</td><td>1</td><td>15,000 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Gauss Heavy Rail</td><td>Coil Warp</td></tr>
+          <tr><td>Mass Driver Tube</td><td>Very Large</td><td>Long</td><td>1×d12</td><td>1</td><td>15,000 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-impact">Impact</span> <span class="dmg-badge dmg-kinetic">Kinetic</span></td><td>Mass Driver Rail</td><td>Magnetic Jam</td></tr>
         </tbody>
       </table>
     </div>
@@ -3168,11 +3187,11 @@
     <div class="weapon-section">
       <div class="weapon-category">Bio RPG</div>
       <table class="weapon-table">
-        <thead><tr><th>Name</th><th>Size</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
+        <thead><tr><th>Name</th><th>Size</th><th>Range</th><th>Damage</th><th>Atk</th><th>Cost (Fed.)</th><th>Rarity</th><th>Effect</th><th>Special</th><th>Malfunction</th></tr></thead>
         <tbody>
-          <tr><td>Spore Bombard</td><td>Very Large</td><td>1×d12</td><td>1</td><td>17,500 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-acidic">Acidic</span></td><td>Corrosive; reduces armor mitigation by 1</td><td>Spore Backlash</td></tr>
-          <tr><td>Hive Mortar</td><td>Very Large</td><td>1×d12</td><td>1</td><td>17,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-bioadaptive">Bio-Adaptive</span></td><td>+1 die vs wounded targets</td><td>Growth Seizure</td></tr>
-          <tr><td>Brood Obliterator</td><td>Very Large</td><td>1×d12</td><td>1</td><td>17,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-poison">Poison</span></td><td>Shredding; on failed save: poisoned, persists</td><td>Spore Backlash</td></tr>
+          <tr><td>Spore Bombard</td><td>Very Large</td><td>Long</td><td>1×d12</td><td>1</td><td>17,500 cr</td><td class="rarity-rare">Rare</td><td><span class="dmg-badge dmg-acidic">Acidic</span></td><td>Corrosive; reduces armor mitigation by 1</td><td>Spore Backlash</td></tr>
+          <tr><td>Hive Mortar</td><td>Very Large</td><td>Long</td><td>1×d12</td><td>1</td><td>17,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-bioadaptive">Bio-Adaptive</span></td><td>+1 die vs wounded targets</td><td>Growth Seizure</td></tr>
+          <tr><td>Brood Obliterator</td><td>Very Large</td><td>Long</td><td>1×d12</td><td>1</td><td>17,500 cr</td><td class="rarity-exotic">Exotic</td><td><span class="dmg-badge dmg-poison">Poison</span></td><td>Shredding; on failed save: poisoned, persists</td><td>Spore Backlash</td></tr>
         </tbody>
       </table>
     </div>
